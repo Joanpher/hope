@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const LoginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
-  password: z.string().min(1, "La contraseña es requerida"),
+  password: z.string().min(1, "Escribe tu contraseña"),
 });
 
 export const RegisterSchema = z
@@ -19,12 +19,12 @@ export const RegisterSchema = z
     phone: z.string().min(7, "Teléfono inválido").optional().or(z.literal("")),
     documentId: z
       .string()
-      .min(5, "Documento de identificación inválido")
+      .min(5, "Escribe tu número de documento (al menos 5 caracteres)")
       .max(20),
     birthDate: z.string().optional().or(z.literal("")),
-    address: z.string().min(5, "Dirección requerida"),
-    city: z.string().min(2, "Ciudad/Municipio requerido"),
-    province: z.string().min(2, "Provincia/Estado requerido"),
+    address: z.string().min(5, "Escribe tu dirección"),
+    city: z.string().min(2, "Escribe tu ciudad o municipio"),
+    province: z.string().min(2, "Escribe tu provincia o estado"),
     password: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres")
@@ -32,7 +32,7 @@ export const RegisterSchema = z
       .regex(/[0-9]/, "Debe contener al menos un número"),
     confirmPassword: z.string(),
     acceptedTerms: z.boolean().refine((v) => v === true, {
-      message: "Debes aceptar los términos y condiciones",
+      message: "Para crear la cuenta, marca que aceptas los términos",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -25,16 +26,9 @@ export function AdminSidebar() {
     <aside className="hidden md:flex flex-col h-screen w-64 bg-slate-900 sticky top-0 z-40">
       {/* Logo */}
       <div className="flex items-center gap-3 p-5 border-b border-slate-800">
-        <img
-          src="/logo.png"
-          alt="HopeRise Foundation"
-          className="h-9 w-auto object-contain bg-white rounded-lg p-0.5 flex-shrink-0"
-        />
         <div className="min-w-0">
-          <p className="text-sm font-bold text-white truncate">
-            HopeRise Foundation
-          </p>
-          <div className="flex items-center gap-1 mt-0.5">
+          <BrandLogo tone="white" className="h-10" />
+          <div className="flex items-center gap-1 mt-2">
             <Shield className="w-3 h-3 text-emerald-400 flex-shrink-0" />
             <span className="text-xs text-emerald-400 font-medium">
               Panel Admin

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { Heart } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -12,23 +13,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-teal-50/20 flex flex-col">
+    <div className="min-h-screen bg-mist flex flex-col">
       {/* Header */}
       <div className="p-6">
-        <Link href="/" className="inline-flex items-center gap-3 group">
-          <img
-            src="/logo.png"
-            alt="HopeRise Foundation"
-            className="h-10 w-auto object-contain bg-white rounded-lg p-1 shadow-sm transition-transform group-hover:scale-105"
-          />
-          <div>
-            <span className="font-extrabold text-slate-900 text-base leading-none block">
-              HopeRise
-            </span>
-            <span className="font-semibold text-xs text-emerald-600 uppercase tracking-wider">
-              Foundation
-            </span>
-          </div>
+        <Link href="/" aria-label="HopeRise Foundation, inicio" className="inline-flex rounded-md p-1">
+          <BrandLogo priority className="h-11 sm:h-12" />
         </Link>
       </div>
 

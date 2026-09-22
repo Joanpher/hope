@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { BrandLogo } from "@/components/site/brand-logo";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -54,20 +55,10 @@ export function DashboardSidebar({
           collapsed && "justify-center p-3"
         )}
       >
-        <img
-          src="/logo.png"
-          alt="HopeRise Foundation"
-          className="h-8 w-auto object-contain flex-shrink-0"
-        />
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="text-sm font-extrabold text-slate-900 truncate">
-              HopeRise
-            </p>
-            <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
-              Foundation
-            </p>
-          </div>
+        {collapsed ? (
+          <BrandLogo variant="mark" className="h-9" />
+        ) : (
+          <BrandLogo className="h-10" />
         )}
       </div>
 

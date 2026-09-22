@@ -14,8 +14,8 @@ import type { Metadata } from "next";
 const contactInfo = [
   { icon: Phone, label: "Teléfono", value: "+1 (809) 555-0123", href: "tel:+18095550123" },
   { icon: Mail, label: "Correo", value: "info@hoperisefoundation.org", href: "mailto:info@hoperisefoundation.org" },
-  { icon: MapPin, label: "Dirección", value: "Av. Principal 123, Santo Domingo, RD", href: "#" },
-  { icon: Clock, label: "Horario", value: "Lun-Vie: 8:00 AM - 5:00 PM", href: "#" },
+  { icon: MapPin, label: "Dirección", value: "Av. Principal 123, Santo Domingo, RD", href: null },
+  { icon: Clock, label: "Horario", value: "Lunes a viernes, de 8:00 a. m. a 5:00 p. m.", href: null },
 ];
 
 function ContactForm() {
@@ -34,6 +34,8 @@ function ContactForm() {
       if (result.success) {
         setSuccess(result.success as string);
         reset();
+      } else if (result.error) {
+        setError(result.error);
       }
     });
   };
@@ -60,7 +62,7 @@ function ContactForm() {
           <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
         </div>
       )}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="name">Nombre completo *</Label>
           <Input id="name" placeholder="Tu nombre" className="mt-1.5" {...register("name")} />
@@ -72,10 +74,10 @@ function ContactForm() {
           {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="phone">Teléfono</Label>
-          <Input id="phone" type="tel" placeholder="809-000-0000" className="mt-1.5" {...register("phone")} />
+          <Input id="phone" type="tel" autoComplete="tel" className="mt-1.5" {...register("phone")} />
         </div>
         <div>
           <Label htmlFor="subject">Asunto *</Label>
@@ -106,50 +108,51 @@ function ContactForm() {
 
 export default function ContactoPage() {
   return (
-    <>
-      <div className="brand-gradient py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Contáctanos</h1>
-          <p className="text-xl text-white/85">Estamos aquí para ayudarte. Escríbenos o llámanos.</p>
+    <section className="bg-white py-12 sm:py-20">
+      <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
+        <div className="lg:col-span-5">
+          <h1 className="font-serif text-[34px] font-semibold leading-tight text-navy sm:text-5xl">
+            Contáctanos
+          </h1>
+          <p className="mt-4 max-w-[42ch] text-[17px] leading-relaxed text-ink-muted sm:text-lg">
+            Si tienes dudas antes de crear tu solicitud, o quieres colaborar con la
+            fundación, escríbenos o llámanos.
+          </p>
+
+          <dl className="mt-10 divide-y divide-line border-y border-line">
+            {contactInfo.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="flex gap-4 py-4">
+                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-leaf" aria-hidden />
+                  <div>
+                    <dt className="text-sm text-ink-muted">{item.label}</dt>
+                    <dd className="mt-0.5 text-base font-bold text-navy">
+                      {item.href ? (
+                        <a href={item.href} className="break-all underline decoration-navy/25 underline-offset-4 hover:decoration-navy">
+                          {item.value}
+                        </a>
+                      ) : (
+                        item.value
+                      )}
+                    </dd>
+                  </div>
+                </div>
+              );
+            })}
+          </dl>
         </div>
-      </div>
 
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-10">
-            {/* Contact info */}
-            <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Información de contacto</h2>
-              <div className="space-y-4">
-                {contactInfo.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-start gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="w-10 h-10 brand-gradient rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">{item.label}</p>
-                        <p className="text-sm font-medium text-slate-700">{item.value}</p>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Form */}
-            <div className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Envíanos un mensaje</h2>
+        <div className="lg:col-span-7">
+          <div className="rounded-lg border border-line bg-white p-5 sm:p-8">
+            <h2 className="font-serif text-2xl font-semibold text-navy">Envíanos un mensaje</h2>
+            <p className="mt-1 text-base text-ink-muted">Te respondemos por correo.</p>
+            <div className="mt-6">
               <ContactForm />
             </div>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

@@ -2,9 +2,21 @@ import { Resend } from "resend";
 import type { AidRequestStatus, AidType } from "@/types/database";
 import { AID_TYPE_LABELS, STATUS_LABELS } from "@/lib/constants";
 
-const FROM = process.env.EMAIL_FROM ?? "HopeRise Foundation <noreply@hoperisefoundation.org>";
+const FROM = process.env.EMAIL_FROM ?? "Fundación Esperanza <notificaciones@jofipos.lat>";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
-const APP_NAME = process.env.APP_NAME ?? "HopeRise Foundation";
+const APP_NAME = process.env.APP_NAME ?? "Fundación Esperanza";
+
+/**
+ * Dirección de contacto mostrada en el pie de cada correo.
+ *
+ * Antes estaba fijada a "info@hoperisefoundation.org", un dominio que no
+ * existe y no tiene relación alguna con el dominio que realmente envía el
+ * correo (jofipos.lat, verificado en Resend). Un pie de página que remite a
+ * un dominio ajeno e inexistente es una señal de ilegitimidad para los
+ * filtros de spam además de, simplemente, un enlace roto para quien lo lea.
+ * Ahora se deriva de la dirección real del remitente en vez de inventar una.
+ */
+const CONTACT_EMAIL = FROM.match(/<(.+)>/)?.[1] ?? FROM;
 
 /**
  * Cliente de Resend creado bajo demanda.
@@ -58,40 +70,62 @@ async function deliver({ to, subject, html }: Message) {
   return { skipped: false as const, id: data?.id };
 }
 
-// ─── Base HTML Email Template ─────────────────────────────────────────────────
-function baseTemplate(title: string, content: string): string {
+// ─── Plantilla base ────────────────────────────────────────────────────────────
+//
+// Principios de diseño, deliberados para no parecer correo masivo/publicitario:
+//   - Sin degradados: un único color sólido y discreto, usado con moderación.
+//   - Sin emoji, ni en asuntos ni en cuerpo.
+//   - Sin bloques de color grandes ni insignias en forma de píldora: el estado
+//     se indica con una etiqueta de texto y un borde lateral, no con un fondo
+//     saturado — así se lee como una notificación de sistema, no como un banner.
+//   - Tipografía y color de texto conservadores (gris oscuro sobre blanco).
+//   - Un único enlace de acción por correo, como botón de borde recto y color
+//     sólido, no como una píldora redondeada con degradado.
+
+const INK = "#1f2933"; // texto principal
+const MUTED = "#5c6570"; // texto secundario
+const ACCENT = "#1d4e42"; // verde bosque discreto: un único color de marca
+const BORDER = "#e2e5e9";
+const SURFACE = "#f6f7f8";
+
+function baseTemplate(preheader: string, content: string): string {
   return `
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title}</title>
+  <title>${APP_NAME}</title>
 </head>
-<body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:30px 0;">
+<body style="margin:0;padding:0;background:${SURFACE};font-family:Arial,Helvetica,sans-serif;">
+  <!-- Preheader: texto que muestran los clientes de correo junto al asunto, oculto en el cuerpo -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}</div>
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${SURFACE};padding:32px 16px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-          <!-- Header -->
+        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid ${BORDER};max-width:560px;width:100%;">
+          <!-- Encabezado: texto sencillo, sin franja de color ni logo decorativo -->
           <tr>
-            <td style="background:linear-gradient(135deg,#1a56db 0%,#0e9f6e 100%);padding:36px 40px;text-align:center;">
-              <h1 style="color:#ffffff;margin:0;font-size:26px;font-weight:700;letter-spacing:-0.5px;">🤝 ${APP_NAME}</h1>
-              <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:14px;">${title}</p>
+            <td style="padding:28px 32px 20px;border-bottom:1px solid ${BORDER};">
+              <span style="color:${INK};font-size:16px;font-weight:700;">${APP_NAME}</span>
             </td>
           </tr>
-          <!-- Body -->
+          <!-- Cuerpo -->
           <tr>
-            <td style="padding:40px;">
+            <td style="padding:32px;">
               ${content}
             </td>
           </tr>
-          <!-- Footer -->
+          <!-- Pie -->
           <tr>
-            <td style="background:#f8fafc;padding:24px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-              <p style="margin:0;color:#64748b;font-size:13px;">Este correo fue enviado por <strong>${APP_NAME}</strong>.</p>
-              <p style="margin:8px 0 0;color:#94a3b8;font-size:12px;">Si tienes preguntas, contáctanos en <a href="mailto:info@hoperisefoundation.org" style="color:#1a56db;">info@hoperisefoundation.org</a></p>
-              <p style="margin:8px 0 0;color:#94a3b8;font-size:11px;">© ${new Date().getFullYear()} ${APP_NAME}. Todos los derechos reservados.</p>
+            <td style="padding:20px 32px;border-top:1px solid ${BORDER};">
+              <p style="margin:0;color:${MUTED};font-size:12px;line-height:1.6;">
+                Recibes este mensaje porque tienes una cuenta en ${APP_NAME}.
+                Si tienes alguna duda, escríbenos a
+                <a href="mailto:${CONTACT_EMAIL}" style="color:${ACCENT};">${CONTACT_EMAIL}</a>.
+              </p>
+              <p style="margin:8px 0 0;color:${MUTED};font-size:11px;">© ${new Date().getFullYear()} ${APP_NAME}</p>
             </td>
           </tr>
         </table>
@@ -103,14 +137,23 @@ function baseTemplate(title: string, content: string): string {
 }
 
 function button(text: string, url: string): string {
-  return `<div style="text-align:center;margin:28px 0;">
-    <a href="${url}" style="background:linear-gradient(135deg,#1a56db,#0e9f6e);color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:600;display:inline-block;">
-      ${text}
-    </a>
-  </div>`;
+  return `<table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+    <tr>
+      <td style="background:${ACCENT};">
+        <a href="${url}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">
+          ${text}
+        </a>
+      </td>
+    </tr>
+  </table>`;
 }
 
-// ─── Welcome Email ─────────────────────────────────────────────────────────────
+/** Etiqueta de texto con borde lateral, en vez de una insignia de color de fondo. */
+function tag(label: string, color: string): string {
+  return `<span style="border-left:3px solid ${color};padding-left:8px;color:${INK};font-size:14px;font-weight:600;">${label}</span>`;
+}
+
+// ─── Correo de bienvenida ──────────────────────────────────────────────────────
 export async function sendWelcomeEmail({
   to,
   firstName,
@@ -119,22 +162,24 @@ export async function sendWelcomeEmail({
   firstName: string;
 }) {
   const content = `
-    <h2 style="color:#1e293b;margin:0 0 16px;font-size:22px;">¡Bienvenido/a, ${firstName}! 🎉</h2>
-    <p style="color:#475569;line-height:1.7;margin:0 0 16px;">Tu cuenta en <strong>${APP_NAME}</strong> ha sido creada exitosamente. Estamos felices de tenerte con nosotros.</p>
-    <p style="color:#475569;line-height:1.7;margin:0 0 24px;">Ahora puedes iniciar sesión y solicitar la ayuda que necesites. Nuestro equipo revisará cada caso con dedicación.</p>
-    ${button("Ir a mi cuenta", `${APP_URL}/dashboard`)}
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin-top:24px;">
-      <p style="margin:0;color:#166534;font-size:14px;">💚 <strong>¿Necesitas ayuda?</strong> Puedes crear tu primera solicitud desde tu panel personal.</p>
-    </div>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">
+      Tu cuenta en ${APP_NAME} quedó creada. Desde tu panel puedes registrar una
+      solicitud de ayuda y ver en qué etapa se encuentra cada una.
+    </p>
+    ${button("Entrar a mi cuenta", `${APP_URL}/dashboard`)}
+    <p style="color:${MUTED};font-size:13px;line-height:1.6;margin:8px 0 0;">
+      Si no creaste esta cuenta, puedes ignorar este mensaje.
+    </p>
   `;
   return deliver({
     to,
-    subject: `¡Bienvenido/a a ${APP_NAME}!`,
-    html: baseTemplate(`¡Bienvenido/a a ${APP_NAME}!`, content),
+    subject: `Tu cuenta en ${APP_NAME} está lista`,
+    html: baseTemplate(`Tu cuenta en ${APP_NAME} quedó creada.`, content),
   });
 }
 
-// ─── Request Confirmation Email ───────────────────────────────────────────────
+// ─── Confirmación de solicitud ─────────────────────────────────────────────────
 export async function sendAidRequestConfirmationEmail({
   to,
   firstName,
@@ -149,27 +194,41 @@ export async function sendAidRequestConfirmationEmail({
   createdAt: Date;
 }) {
   const content = `
-    <h2 style="color:#1e293b;margin:0 0 16px;font-size:22px;">Hemos recibido tu solicitud 📋</h2>
-    <p style="color:#475569;line-height:1.7;margin:0 0 20px;">Hola <strong>${firstName}</strong>, tu solicitud de ayuda ha sido registrada correctamente en nuestro sistema.</p>
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:24px 0;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr><td style="padding:8px 0;color:#64748b;font-size:14px;">Código de solicitud</td><td style="padding:8px 0;text-align:right;"><strong style="color:#1a56db;font-size:16px;font-family:monospace;">${code}</strong></td></tr>
-        <tr><td style="padding:8px 0;color:#64748b;font-size:14px;border-top:1px solid #f1f5f9;">Tipo de ayuda</td><td style="padding:8px 0;text-align:right;border-top:1px solid #f1f5f9;"><strong style="color:#1e293b;">${AID_TYPE_LABELS[aidType]}</strong></td></tr>
-        <tr><td style="padding:8px 0;color:#64748b;font-size:14px;border-top:1px solid #f1f5f9;">Estado inicial</td><td style="padding:8px 0;text-align:right;border-top:1px solid #f1f5f9;"><span style="background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:13px;">Solicitud recibida</span></td></tr>
-        <tr><td style="padding:8px 0;color:#64748b;font-size:14px;border-top:1px solid #f1f5f9;">Fecha de registro</td><td style="padding:8px 0;text-align:right;border-top:1px solid #f1f5f9;color:#1e293b;">${new Intl.DateTimeFormat("es-ES",{dateStyle:"long"}).format(createdAt)}</td></tr>
-      </table>
-    </div>
-    <p style="color:#475569;line-height:1.7;margin:0 0 24px;">Nuestro equipo revisará tu solicitud y te mantendrá informado/a sobre el progreso. Puedes consultar el estado en cualquier momento desde tu cuenta.</p>
-    ${button("Consultar mi solicitud", `${APP_URL}/solicitudes`)}
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 20px;">
+      Registramos tu solicitud de ayuda con los siguientes datos:
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BORDER};margin:0 0 20px;">
+      <tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;border-bottom:1px solid ${BORDER};">Código</td>
+        <td style="padding:10px 16px;text-align:right;font-family:monospace;font-size:14px;color:${INK};border-bottom:1px solid ${BORDER};">${code}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;border-bottom:1px solid ${BORDER};">Tipo de ayuda</td>
+        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};border-bottom:1px solid ${BORDER};">${AID_TYPE_LABELS[aidType]}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;">Fecha</td>
+        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};">${new Intl.DateTimeFormat("es-ES", { dateStyle: "long" }).format(createdAt)}</td>
+      </tr>
+    </table>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 8px;">
+      ${tag("Estado actual: Solicitud recibida", ACCENT)}
+    </p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:16px 0;">
+      Un miembro de nuestro equipo revisará el caso. Te avisaremos por este mismo
+      medio cada vez que cambie de estado.
+    </p>
+    ${button("Ver mi solicitud", `${APP_URL}/solicitudes`)}
   `;
   return deliver({
     to,
-    subject: `Hemos recibido tu solicitud ${code} | ${APP_NAME}`,
-    html: baseTemplate("Solicitud recibida", content),
+    subject: `Solicitud ${code} recibida`,
+    html: baseTemplate(`Registramos tu solicitud ${code}.`, content),
   });
 }
 
-// ─── Status Change Email ──────────────────────────────────────────────────────
+// ─── Cambio de estado ──────────────────────────────────────────────────────────
 export async function sendStatusChangeEmail({
   to,
   firstName,
@@ -185,39 +244,41 @@ export async function sendStatusChangeEmail({
   newStatus: AidRequestStatus;
   userComment: string;
 }) {
-  const isApproved = newStatus === "APPROVED";
-  const isDelivered = newStatus === "DELIVERED";
+  const isPositive = newStatus === "APPROVED" || newStatus === "DELIVERED";
   const isRejected = newStatus === "REJECTED";
-
-  const headerIcon = isApproved ? "✅" : isDelivered ? "🎉" : isRejected ? "❌" : "🔔";
+  const statusColor = isPositive ? "#2f6e4a" : isRejected ? "#a33a3a" : ACCENT;
 
   const content = `
-    <h2 style="color:#1e293b;margin:0 0 16px;font-size:22px;">${headerIcon} Actualización de tu solicitud</h2>
-    <p style="color:#475569;line-height:1.7;margin:0 0 20px;">Hola <strong>${firstName}</strong>, el estado de tu solicitud <strong style="color:#1a56db;font-family:monospace;">${code}</strong> ha sido actualizado.</p>
-    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:24px 0;">
-      <table width="100%" cellpadding="0" cellspacing="0">
-        <tr>
-          <td style="padding:10px 0;color:#64748b;font-size:14px;">Estado anterior</td>
-          <td style="padding:10px 0;text-align:right;"><span style="background:#f1f5f9;color:#475569;padding:3px 10px;border-radius:20px;font-size:13px;">${STATUS_LABELS[previousStatus]}</span></td>
-        </tr>
-        <tr>
-          <td style="padding:10px 0;color:#64748b;font-size:14px;border-top:1px solid #f1f5f9;">Nuevo estado</td>
-          <td style="padding:10px 0;text-align:right;border-top:1px solid #f1f5f9;"><span style="background:${isApproved||isDelivered ? "#dcfce7" : isRejected ? "#fee2e2" : "#dbeafe"};color:${isApproved||isDelivered ? "#166534" : isRejected ? "#991b1b" : "#1e40af"};padding:3px 10px;border-radius:20px;font-size:13px;font-weight:600;">${STATUS_LABELS[newStatus]}</span></td>
-        </tr>
-      </table>
-    </div>
-    ${userComment ? `<div style="background:#f0fdf4;border-left:4px solid #22c55e;border-radius:0 8px 8px 0;padding:16px;margin:20px 0;"><p style="margin:0;color:#166534;font-size:14px;line-height:1.6;"><strong>Mensaje de la fundación:</strong><br/>${userComment}</p></div>` : ""}
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 20px;">
+      El estado de tu solicitud <span style="font-family:monospace;">${code}</span> cambió.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BORDER};margin:0 0 20px;">
+      <tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;border-bottom:1px solid ${BORDER};">Estado anterior</td>
+        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};border-bottom:1px solid ${BORDER};">${STATUS_LABELS[previousStatus]}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;">Estado actual</td>
+        <td style="padding:10px 16px;text-align:right;">${tag(STATUS_LABELS[newStatus], statusColor)}</td>
+      </tr>
+    </table>
+    ${
+      userComment
+        ? `<p style="color:${INK};font-size:14px;line-height:1.6;margin:0 0 20px;border-left:3px solid ${BORDER};padding-left:12px;">${userComment}</p>`
+        : ""
+    }
     ${button("Ver detalles de mi solicitud", `${APP_URL}/solicitudes`)}
   `;
 
   return deliver({
     to,
-    subject: `Actualización de tu solicitud ${code} | ${APP_NAME}`,
-    html: baseTemplate(`Actualización: ${STATUS_LABELS[newStatus]}`, content),
+    subject: `Solicitud ${code}: ${STATUS_LABELS[newStatus]}`,
+    html: baseTemplate(`Tu solicitud ${code} cambió a ${STATUS_LABELS[newStatus]}.`, content),
   });
 }
 
-// ─── Password Reset Email ─────────────────────────────────────────────────────
+// ─── Recuperación de contraseña ────────────────────────────────────────────────
 export async function sendPasswordResetEmail({
   to,
   firstName,
@@ -228,17 +289,19 @@ export async function sendPasswordResetEmail({
   resetUrl: string;
 }) {
   const content = `
-    <h2 style="color:#1e293b;margin:0 0 16px;font-size:22px;">Recuperación de contraseña 🔐</h2>
-    <p style="color:#475569;line-height:1.7;margin:0 0 16px;">Hola <strong>${firstName}</strong>, recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
-    <p style="color:#475569;line-height:1.7;margin:0 0 24px;">Haz clic en el botón a continuación para crear una nueva contraseña. Este enlace expirará en <strong>1 hora</strong>.</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">
+      Recibimos una solicitud para restablecer la contraseña de tu cuenta en ${APP_NAME}.
+      El enlace vence en 1 hora.
+    </p>
     ${button("Restablecer contraseña", resetUrl)}
-    <div style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:14px;margin-top:24px;">
-      <p style="margin:0;color:#854d0e;font-size:13px;">⚠️ Si no solicitaste este cambio, puedes ignorar este correo. Tu contraseña no será modificada.</p>
-    </div>
+    <p style="color:${MUTED};font-size:13px;line-height:1.6;margin:20px 0 0;border-left:3px solid ${BORDER};padding-left:12px;">
+      Si no solicitaste este cambio, ignora este mensaje: tu contraseña seguirá siendo la misma.
+    </p>
   `;
   return deliver({
     to,
-    subject: `Recuperación de contraseña | ${APP_NAME}`,
-    html: baseTemplate("Recuperación de contraseña", content),
+    subject: `Restablece tu contraseña en ${APP_NAME}`,
+    html: baseTemplate("Solicitud de restablecimiento de contraseña.", content),
   });
 }

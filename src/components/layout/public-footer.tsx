@@ -1,129 +1,95 @@
 import Link from "next/link";
-import {
-  Heart,
-  Phone,
-  Mail,
-  MapPin,
-  ExternalLink,
-} from "lucide-react";
+import { BrandLogo } from "@/components/site/brand-logo";
+
+// Placeholders heredados de la plantilla original: el teléfono es un 555 y el
+// dominio del correo no existe. Sustitúyelos por los datos reales.
+const CONTACT = {
+  phone: "+1 (809) 555-0123",
+  phoneHref: "tel:+18095550123",
+  email: "info@hoperisefoundation.org",
+  address: "Av. Principal 123, Santo Domingo, República Dominicana",
+};
+
+const columns = [
+  {
+    title: "La fundación",
+    links: [
+      { href: "/#programas", label: "Programas" },
+      { href: "/#como-funciona", label: "Cómo funciona" },
+      { href: "/#nosotros", label: "Quiénes somos" },
+      { href: "/contacto", label: "Contacto" },
+    ],
+  },
+  {
+    title: "Tu cuenta",
+    links: [
+      { href: "/register", label: "Solicitar ayuda" },
+      { href: "/login", label: "Entrar" },
+      { href: "/forgot-password", label: "Recuperar contraseña" },
+    ],
+  },
+];
 
 export function PublicFooter() {
   return (
-    <footer className="bg-slate-900 text-slate-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img
-                src="/logo.png"
-                alt="HopeRise Foundation"
-                className="h-12 w-auto object-contain bg-white rounded-xl p-1 shadow-md"
-              />
-              <div>
-                <p className="font-extrabold text-white text-lg leading-none">
-                  HopeRise
-                </p>
-                <p className="font-semibold text-xs tracking-wider text-emerald-400 uppercase">
-                  Foundation
-                </p>
-              </div>
-            </div>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Rising Hope, Changing Lives. Transformando vidas a través de programas de ayuda humanitaria transparentes y accesibles.
+    <footer className="bg-navy-deep text-white/75">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-16">
+        <div className="grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <BrandLogo tone="white" className="h-12 sm:h-14" />
+            <p className="mt-5 max-w-[40ch] text-base leading-relaxed">
+              Apoyamos a familias en situación de vulnerabilidad con alimentación,
+              salud, educación, vivienda y respuesta a emergencias.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">
-              Navegación rápida
-            </h3>
-            <ul className="space-y-2.5">
-              {[
-                { href: "/#nosotros", label: "Nosotros" },
-                { href: "/#programas", label: "Programas" },
-                { href: "/#como-funciona", label: "Cómo funciona" },
-                { href: "/contacto", label: "Contacto" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* En móvil, las dos columnas de enlaces van lado a lado para no alargar el pie. */}
+          <div className="grid grid-cols-2 gap-8 lg:col-span-4">
+            {columns.map((col) => (
+              <div key={col.title}>
+                <h2 className="font-bold text-white">{col.title}</h2>
+                <ul className="mt-3">
+                  {col.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="inline-flex min-h-11 items-center text-base transition-colors hover:text-white"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          {/* Account */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Mi cuenta</h3>
-            <ul className="space-y-2.5">
-              {[
-                { href: "/login", label: "Iniciar sesión" },
-                { href: "/register", label: "Registrarse" },
-                { href: "/forgot-password", label: "Recuperar contraseña" },
-                { href: "/solicitudes", label: "Mis solicitudes" },
-              ].map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-400 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Contacto</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 mt-0.5 text-blue-400 flex-shrink-0" />
-                <span className="text-sm text-slate-400">
-                  +1 (809) 555-0123
-                </span>
+          <div className="lg:col-span-3">
+            <h2 className="font-bold text-white">Contacto</h2>
+            <ul className="mt-3 space-y-1 text-base">
+              <li>
+                <a href={CONTACT.phoneHref} className="inline-flex min-h-11 items-center transition-colors hover:text-white">
+                  {CONTACT.phone}
+                </a>
               </li>
-              <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 mt-0.5 text-blue-400 flex-shrink-0" />
-                <span className="text-sm text-slate-400">
-                  info@hoperisefoundation.org
-                </span>
+              <li>
+                <a href={`mailto:${CONTACT.email}`} className="inline-flex min-h-11 items-center break-all transition-colors hover:text-white">
+                  {CONTACT.email}
+                </a>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 mt-0.5 text-blue-400 flex-shrink-0" />
-                <span className="text-sm text-slate-400">
-                  Av. Principal 123, Santo Domingo, República Dominicana
-                </span>
-              </li>
+              <li className="pt-2 leading-relaxed">{CONTACT.address}</li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-slate-800 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} HopeRise Foundation. Todos los
-            derechos reservados.
-          </p>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/privacidad"
-              className="text-sm text-slate-500 hover:text-white transition-colors"
-            >
-              Política de privacidad
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/15 pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} HopeRise Foundation</p>
+          <div className="flex gap-6">
+            <Link href="/privacidad" className="inline-flex min-h-11 items-center transition-colors hover:text-white">
+              Privacidad
             </Link>
-            <Link
-              href="/terminos"
-              className="text-sm text-slate-500 hover:text-white transition-colors"
-            >
-              Términos y condiciones
+            <Link href="/terminos" className="inline-flex min-h-11 items-center transition-colors hover:text-white">
+              Términos
             </Link>
           </div>
         </div>
