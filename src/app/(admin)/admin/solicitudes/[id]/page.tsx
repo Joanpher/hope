@@ -4,7 +4,7 @@ import { getAidRequestForAdmin } from "@/server/queries/aid-request";
 import Link from "next/link";
 import {
   ArrowLeft, User, FileText, CheckCircle2, Calendar, Phone, MessageCircle,
-  Mail, Lock,
+  Mail, Lock, Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusChangeForm } from "@/components/admin/status-change-form";
@@ -82,7 +82,27 @@ export default async function AdminSolicitudDetailPage({
           </div>
           <p className="text-ink-muted text-sm mt-0.5">{AID_TYPE_LABELS[request.aidType]}</p>
         </div>
+        <a
+          href={`/api/solicitudes/${request.id}/documento`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden shrink-0 items-center gap-2 rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-navy transition-colors hover:border-leaf/40 hover:bg-leaf-soft/40 sm:flex"
+        >
+          <Download className="h-4 w-4" />
+          Documento PDF
+        </a>
       </div>
+
+      {/* En móvil el botón del encabezado no cabe junto al código y el estado. */}
+      <a
+        href={`/api/solicitudes/${request.id}/documento`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mb-6 flex items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 py-3 text-sm font-semibold text-navy sm:hidden"
+      >
+        <Download className="h-4 w-4" />
+        Documento PDF del expediente
+      </a>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Left column */}

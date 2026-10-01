@@ -3,8 +3,8 @@ import { redirect, notFound } from "next/navigation";
 import { getAidRequestWithHistory } from "@/server/queries/aid-request";
 import Link from "next/link";
 import {
-  ArrowLeft, CheckCircle2, Clock, XCircle, Circle, Calendar,
-  User, FileText, MessageSquare
+  ArrowLeft, CheckCircle2, Clock, XCircle, Circle,
+  User, FileText, MessageSquare, Download
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -133,12 +133,33 @@ export default async function SolicitudDetailPage({
           <h1 className="text-xl font-bold text-navy font-mono">{request.code}</h1>
           <p className="text-ink-muted text-sm">{AID_TYPE_LABELS[request.aidType]}</p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
           <span className={`status-badge ${STATUS_COLORS[request.status]}`}>
             {STATUS_LABELS[request.status]}
           </span>
         </div>
       </div>
+
+      {/* Documento oficial del expediente */}
+      <a
+        href={`/api/solicitudes/${request.id}/documento`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mb-6 flex items-center gap-3 rounded-xl border border-line bg-white p-4 transition-colors hover:border-leaf/40 hover:bg-leaf-soft/30"
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-leaf-soft">
+          <FileText className="h-5 w-5 text-leaf-dark" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-navy">
+            Descargar documento del expediente
+          </span>
+          <span className="block text-xs text-ink-muted">
+            PDF con todos los datos de tu solicitud, firmado por la fundación.
+          </span>
+        </span>
+        <Download className="h-5 w-5 shrink-0 text-ink-muted" />
+      </a>
 
       {/* Stepper */}
       <Card className="mb-6">

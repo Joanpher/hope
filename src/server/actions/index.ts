@@ -102,14 +102,35 @@ export async function createAidRequest(
   });
   if (notifyError) console.error("Failed to create notification:", notifyError);
 
-  // Correo de confirmación con el detalle completo de lo enviado.
+  // Correo de confirmación con el detalle completo y el acta en PDF adjunta.
   const user = await getUserById(session.user.id);
   if (user) {
+    // El acta se arma en su propio try: si fallara, el correo debe salir igual
+    // sin adjunto, en vez de dejar a la persona sin confirmación de nada.
+    // Se relee la solicitud porque el acta necesita los datos del solicitante,
+    // y así el PDF adjunto es idéntico al que luego descarga desde el panel.
+    let document: { filename: string; content: Buffer } | undefined;
+    try {
+      const full = await getAidRequestById(created.id);
+      if (full) {
+        const { renderAidRequestDocument } = await import(
+          "@/lib/pdf/aid-request-document"
+        );
+        document = {
+          filename: `HopeRise-${code}.pdf`,
+          content: await renderAidRequestDocument(full),
+        };
+      }
+    } catch (e) {
+      console.error("Failed to render aid request document:", e);
+    }
+
     try {
       await sendAidRequestConfirmationEmail({
         to: user.email,
         firstName: user.firstName,
         request: created,
+        document,
       });
     } catch (e) {
       console.error("Failed to send confirmation email:", e);

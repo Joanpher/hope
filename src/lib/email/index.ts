@@ -7,9 +7,19 @@ import {
 } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
-const FROM = process.env.EMAIL_FROM ?? "Fundación Esperanza <notificaciones@jofipos.lat>";
+const FROM = process.env.EMAIL_FROM ?? "HopeRise Foundation <notificaciones@jofipos.lat>";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
-const APP_NAME = process.env.APP_NAME ?? "Fundación Esperanza";
+const APP_NAME = process.env.APP_NAME ?? "HopeRise Foundation";
+
+/**
+ * Logo de la cabecera.
+ *
+ * Va como URL pública y no como adjunto en línea: así el mensaje pesa unos
+ * pocos kilobytes en vez de arrastrar el PNG en cada envío. Requiere que
+ * APP_URL apunte al dominio real en producción; en local la imagen no cargará
+ * en una bandeja de entrada porque localhost no resuelve fuera de la máquina.
+ */
+const LOGO_URL = `${APP_URL}/brand/logo-horizontal.png`;
 
 /**
  * Dirección de contacto mostrada en el pie de cada correo.
@@ -47,13 +57,20 @@ export function isEmailEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY?.trim());
 }
 
-type Message = { to: string; subject: string; html: string };
+export type EmailAttachment = { filename: string; content: Buffer };
+
+type Message = {
+  to: string;
+  subject: string;
+  html: string;
+  attachments?: EmailAttachment[];
+};
 
 /**
  * Envía un correo, o lo omite con un aviso en consola si no hay clave.
  * Todas las funciones de este módulo pasan por aquí.
  */
-async function deliver({ to, subject, html }: Message) {
+async function deliver({ to, subject, html, attachments }: Message) {
   const resend = getClient();
 
   if (!resend) {
@@ -63,7 +80,13 @@ async function deliver({ to, subject, html }: Message) {
     return { skipped: true as const };
   }
 
-  const { data, error } = await resend.emails.send({ from: FROM, to, subject, html });
+  const { data, error } = await resend.emails.send({
+    from: FROM,
+    to,
+    subject,
+    html,
+    ...(attachments?.length ? { attachments } : {}),
+  });
 
   if (error) {
     // Se registra y se propaga: quien llama ya envuelve el envío en try/catch
@@ -87,50 +110,77 @@ async function deliver({ to, subject, html }: Message) {
 //   - Un único enlace de acción por correo, como botón de borde recto y color
 //     sólido, no como una píldora redondeada con degradado.
 
+// Paleta tomada del sitio y del acta en PDF, para que los tres se reconozcan
+// como la misma institución.
+const NAVY = "#0e2f52"; // titulares y cabecera
 const INK = "#1f2933"; // texto principal
 const MUTED = "#5c6570"; // texto secundario
-const ACCENT = "#1d4e42"; // verde bosque discreto: un único color de marca
+const ACCENT = "#0b7a57"; // verde de marca: enlaces y botón
 const BORDER = "#e2e5e9";
-const SURFACE = "#f6f7f8";
+const SURFACE = "#f2f5f7";
 
-function baseTemplate(preheader: string, content: string): string {
+function baseTemplate({
+  preheader,
+  title,
+  content,
+}: {
+  preheader: string;
+  /** Titular del mensaje. Da contexto antes del saludo, como en cualquier
+   *  comunicación formal, en vez de arrancar directamente con "Hola". */
+  title: string;
+  content: string;
+}): string {
   return `
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${APP_NAME}</title>
+  <meta name="color-scheme" content="light only" />
+  <meta name="supported-color-schemes" content="light only" />
+  <title>${esc(title)}</title>
 </head>
-<body style="margin:0;padding:0;background:${SURFACE};font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background:${SURFACE};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased;">
   <!-- Preheader: texto que muestran los clientes de correo junto al asunto, oculto en el cuerpo -->
-  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}</div>
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</div>
 
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:${SURFACE};padding:32px 16px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${SURFACE};padding:32px 16px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid ${BORDER};max-width:560px;width:100%;">
-          <!-- Encabezado: texto sencillo, sin franja de color ni logo decorativo -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border:1px solid ${BORDER};border-radius:4px;max-width:600px;width:100%;">
+          <!-- Cabecera: el logo de la fundación sobre blanco, con filete de marca -->
           <tr>
-            <td style="padding:28px 32px 20px;border-bottom:1px solid ${BORDER};">
-              <span style="color:${INK};font-size:16px;font-weight:700;">${APP_NAME}</span>
+            <td style="padding:28px 36px 22px;border-bottom:3px solid ${NAVY};">
+              <a href="${APP_URL}" style="text-decoration:none;">
+                <img src="${LOGO_URL}" alt="${esc(APP_NAME)}" width="176" height="54"
+                     style="display:block;width:176px;height:auto;border:0;outline:none;" />
+              </a>
             </td>
           </tr>
+
           <!-- Cuerpo -->
           <tr>
-            <td style="padding:32px;">
+            <td style="padding:32px 36px 36px;">
+              <h1 style="margin:0 0 20px;color:${NAVY};font-size:21px;line-height:1.3;font-weight:700;">${esc(title)}</h1>
               ${content}
             </td>
           </tr>
+
           <!-- Pie -->
           <tr>
-            <td style="padding:20px 32px;border-top:1px solid ${BORDER};">
-              <p style="margin:0;color:${MUTED};font-size:12px;line-height:1.6;">
-                Recibes este mensaje porque tienes una cuenta en ${APP_NAME}.
-                Si tienes alguna duda, escríbenos a
-                <a href="mailto:${CONTACT_EMAIL}" style="color:${ACCENT};">${CONTACT_EMAIL}</a>.
+            <td style="padding:22px 36px 26px;border-top:1px solid ${BORDER};background:#fbfcfc;">
+              <p style="margin:0 0 10px;color:${INK};font-size:13px;font-weight:700;">${esc(APP_NAME)}</p>
+              <p style="margin:0;color:${MUTED};font-size:12px;line-height:1.7;">
+                Recibes este mensaje porque tienes una cuenta en ${esc(APP_NAME)}.
+                ¿Dudas? Escríbenos a
+                <a href="mailto:${CONTACT_EMAIL}" style="color:${ACCENT};text-decoration:underline;">${CONTACT_EMAIL}</a>.
               </p>
-              <p style="margin:8px 0 0;color:${MUTED};font-size:11px;">© ${new Date().getFullYear()} ${APP_NAME}</p>
+              <p style="margin:12px 0 0;color:${MUTED};font-size:12px;line-height:1.7;">
+                <a href="${APP_URL}/terminos" style="color:${MUTED};text-decoration:underline;">Términos y condiciones</a>
+                &nbsp;·&nbsp;
+                <a href="${APP_URL}/privacidad" style="color:${MUTED};text-decoration:underline;">Política de privacidad</a>
+              </p>
+              <p style="margin:14px 0 0;color:${MUTED};font-size:11px;">© ${new Date().getFullYear()} ${esc(APP_NAME)}</p>
             </td>
           </tr>
         </table>
@@ -195,11 +245,11 @@ function textBlock(label: string, value: string | null | undefined): string {
 }
 
 function button(text: string, url: string): string {
-  return `<table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 8px;">
     <tr>
-      <td style="background:${ACCENT};">
-        <a href="${url}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">
-          ${text}
+      <td style="background:${ACCENT};border-radius:4px;">
+        <a href="${url}" style="display:inline-block;padding:13px 28px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:4px;">
+          ${esc(text)}
         </a>
       </td>
     </tr>
@@ -233,7 +283,11 @@ export async function sendWelcomeEmail({
   return deliver({
     to,
     subject: `Tu cuenta en ${APP_NAME} está lista`,
-    html: baseTemplate(`Tu cuenta en ${APP_NAME} quedó creada.`, content),
+    html: baseTemplate({
+      preheader: `Tu cuenta en ${APP_NAME} quedó creada.`,
+      title: "Tu cuenta está lista",
+      content,
+    }),
   });
 }
 
@@ -245,10 +299,13 @@ export async function sendAidRequestConfirmationEmail({
   to,
   firstName,
   request,
+  document,
 }: {
   to: string;
   firstName: string;
   request: AidRequest;
+  /** Acta del expediente en PDF, adjunta al mensaje cuando se pudo generar. */
+  document?: EmailAttachment;
 }) {
   const createdAt = new Date(request.createdAt);
 
@@ -310,6 +367,15 @@ export async function sendAidRequestConfirmationEmail({
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 8px;">
       ${tag(`Estado actual: ${STATUS_LABELS[request.status]}`, ACCENT)}
     </p>
+    ${
+      document
+        ? `<p style="color:${INK};font-size:14px;line-height:1.6;margin:0 0 16px;border-left:3px solid ${ACCENT};padding-left:12px;">
+             Adjunto a este correo encontrarás el documento oficial de tu
+             expediente en PDF, con todos estos datos y la firma de la fundación.
+             Guárdalo: es el comprobante de tu solicitud.
+           </p>`
+        : ""
+    }
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:16px 0;">
       Un miembro de nuestro equipo revisará el caso. Te avisaremos por este mismo
       medio cada vez que cambie de estado. Si algún dato no es correcto,
@@ -321,10 +387,12 @@ export async function sendAidRequestConfirmationEmail({
   return deliver({
     to,
     subject: `Solicitud ${request.code} recibida`,
-    html: baseTemplate(
-      `Registramos tu solicitud ${request.code} de ${AID_TYPE_LABELS[request.aidType]}.`,
-      content
-    ),
+    html: baseTemplate({
+      preheader: `Registramos tu solicitud ${request.code} de ${AID_TYPE_LABELS[request.aidType]}.`,
+      title: `Recibimos tu solicitud ${request.code}`,
+      content,
+    }),
+    attachments: document ? [document] : undefined,
   });
 }
 
@@ -374,7 +442,11 @@ export async function sendStatusChangeEmail({
   return deliver({
     to,
     subject: `Solicitud ${code}: ${STATUS_LABELS[newStatus]}`,
-    html: baseTemplate(`Tu solicitud ${code} cambió a ${STATUS_LABELS[newStatus]}.`, content),
+    html: baseTemplate({
+      preheader: `Tu solicitud ${code} cambió a ${STATUS_LABELS[newStatus]}.`,
+      title: `Tu solicitud ${code} cambió de estado`,
+      content,
+    }),
   });
 }
 
@@ -402,6 +474,10 @@ export async function sendPasswordResetEmail({
   return deliver({
     to,
     subject: `Restablece tu contraseña en ${APP_NAME}`,
-    html: baseTemplate("Solicitud de restablecimiento de contraseña.", content),
+    html: baseTemplate({
+      preheader: "Solicitud de restablecimiento de contraseña.",
+      title: "Restablece tu contraseña",
+      content,
+    }),
   });
 }
