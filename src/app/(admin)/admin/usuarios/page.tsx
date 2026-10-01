@@ -42,7 +42,7 @@ export default async function AdminUsuariosPage({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-3">
         {[
           { label: "Total", value: stats.total, icon: Users, tint: "bg-navy/10 text-navy" },
           { label: "Activos", value: stats.active, icon: ShieldCheck, tint: "bg-leaf-soft text-leaf-dark" },

@@ -47,7 +47,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="firstName">Nombres *</Label>
           <Input id="firstName" className="mt-1.5" {...register("firstName")} />
@@ -68,7 +68,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <Label htmlFor="address">Dirección</Label>
         <Input id="address" className="mt-1.5" {...register("address")} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="city">Ciudad</Label>
           <Input id="city" className="mt-1.5" {...register("city")} />

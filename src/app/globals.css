@@ -354,3 +354,19 @@
 @media (prefers-reduced-motion: reduce) {
   .onboarding-step { animation: none; }
 }
+
+/*
+ * ─── Menú lateral en móvil ───
+ * Entra desde el borde por el que vive en escritorio, para que se lea como la
+ * misma barra lateral asomándose y no como una pantalla nueva.
+ */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+.drawer-panel {
+  animation: drawer-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-panel { animation: none; }
+}

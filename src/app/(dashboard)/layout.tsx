@@ -14,7 +14,9 @@ export default async function DashboardLayout({
   const unreadCount = await countUnreadNotifications(session.user.id);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-mist">
+    // En móvil se apila: cabecera con el menú arriba y contenido debajo. De
+    // `md` en adelante, barra lateral a la izquierda y contenido al lado.
+    <div className="flex h-screen flex-col overflow-hidden bg-mist md:flex-row">
       <DashboardSidebar
         user={{
           firstName: session.user.firstName,
@@ -25,7 +27,7 @@ export default async function DashboardLayout({
         unreadCount={unreadCount}
       />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-8 lg:px-8">
           {children}
         </div>
       </main>

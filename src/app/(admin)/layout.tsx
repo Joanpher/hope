@@ -17,10 +17,10 @@ export default async function AdminLayout({
   if (session.user.role !== "ADMIN") redirect("/acceso-denegado");
 
   return (
-    <div className="flex h-screen overflow-hidden bg-mist">
+    <div className="flex h-screen flex-col overflow-hidden bg-mist md:flex-row">
       <AdminSidebar />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 md:py-8 lg:px-8">
           {children}
         </div>
       </main>

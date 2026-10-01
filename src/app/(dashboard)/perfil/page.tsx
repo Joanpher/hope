@@ -65,7 +65,7 @@ export default async function PerfilPage() {
           <CardDescription>Estos datos no pueden modificarse directamente.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="bg-mist rounded-xl p-3">
               <p className="text-xs text-ink-muted uppercase tracking-wider mb-0.5">Documento / Cédula</p>
               <p className="text-sm font-medium text-ink font-mono">{user.documentId}</p>

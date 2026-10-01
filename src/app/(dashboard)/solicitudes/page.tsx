@@ -85,13 +85,13 @@ export default async function SolicitudesPage({
 
   return (
     <div className="animate-fade-in">
-      <div className="flex items-start justify-between mb-8">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-navy">Mis Solicitudes</h1>
           <p className="text-ink-muted mt-1">Gestiona y consulta el estado de tus solicitudes de ayuda.</p>
         </div>
-        <Link href="/solicitudes/nueva">
-          <Button id="btn-nueva-solicitud">
+        <Link href="/solicitudes/nueva" className="shrink-0">
+          <Button id="btn-nueva-solicitud" className="w-full sm:w-auto">
             <PlusCircle className="w-4 h-4" />
             Nueva solicitud
           </Button>
