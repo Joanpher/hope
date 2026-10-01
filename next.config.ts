@@ -10,10 +10,23 @@ const nextConfig: NextConfig = {
   // sin logo solo en producción.
   // Hay dos puntos que generan el acta: la ruta de descarga y la Server Action
   // que crea la solicitud (adjunta el PDF al correo de confirmación). Cada una
-  // se empaqueta por separado, así que ambas necesitan los PNG declarados.
+  // se empaqueta por separado, así que ambas necesitan los mismos archivos.
+  //
+  //  - Los PNG del logo, que se leen con `fs`.
+  //  - Las métricas de las fuentes estándar de pdfkit. `pdfkit` las carga con
+  //    un `require` cuya ruta se arma en tiempo de ejecución, así que el
+  //    trazado de Next no las ve y la función se desplegaba sin ellas: en
+  //    local funcionaba y en Vercel reventaba con "Cannot find module
+  //    .../standard-fonts/Helvetica.cjs".
   outputFileTracingIncludes: {
-    "/api/solicitudes/[id]/documento": ["./public/brand/logo-*.png"],
-    "/solicitudes/nueva": ["./public/brand/logo-*.png"],
+    "/api/solicitudes/[id]/documento": [
+      "./public/brand/logo-*.png",
+      "./node_modules/pdfkit/js/standard-fonts/**",
+    ],
+    "/solicitudes/nueva": [
+      "./public/brand/logo-*.png",
+      "./node_modules/pdfkit/js/standard-fonts/**",
+    ],
   },
   // `experimental.serverActions.allowedOrigins` estaba fijado a
   // ["localhost:3000"]. Esa opción añade orígenes permitidos ADEMÁS del propio
