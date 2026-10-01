@@ -102,16 +102,14 @@ export async function createAidRequest(
   });
   if (notifyError) console.error("Failed to create notification:", notifyError);
 
-  // Correo de confirmación
+  // Correo de confirmación con el detalle completo de lo enviado.
   const user = await getUserById(session.user.id);
   if (user) {
     try {
       await sendAidRequestConfirmationEmail({
         to: user.email,
         firstName: user.firstName,
-        code,
-        aidType,
-        createdAt: toDate(created.createdAt),
+        request: created,
       });
     } catch (e) {
       console.error("Failed to send confirmation email:", e);

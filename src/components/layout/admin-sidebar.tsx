@@ -8,8 +8,8 @@ import {
   FileText,
   Users,
   LogOut,
-  Heart,
   Shield,
+  LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,15 +23,15 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col h-screen w-64 bg-slate-900 sticky top-0 z-40">
+    <aside className="hidden md:flex flex-col h-screen w-64 bg-navy-deep sticky top-0 z-40">
       {/* Logo */}
-      <div className="flex items-center gap-3 p-5 border-b border-slate-800">
+      <div className="flex items-center gap-3 p-5 border-b border-white/10">
         <div className="min-w-0">
           <BrandLogo tone="white" className="h-10" />
-          <div className="flex items-center gap-1 mt-2">
-            <Shield className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-            <span className="text-xs text-emerald-400 font-medium">
-              Panel Admin
+          <div className="flex items-center gap-1.5 mt-2">
+            <Shield className="w-3 h-3 text-leaf flex-shrink-0" />
+            <span className="text-xs text-white/60 font-medium">
+              Panel administrativo
             </span>
           </div>
         </div>
@@ -51,8 +51,8 @@ export function AdminSidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-leaf text-white shadow-md shadow-leaf/20"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               )}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -63,10 +63,17 @@ export function AdminSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-800">
+      <div className="p-3 border-t border-white/10 space-y-1">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all duration-200"
+        >
+          <LayoutGrid className="w-4 h-4 flex-shrink-0" />
+          Ir a mi panel
+        </Link>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-all duration-200"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200"
         >
           <LogOut className="w-4 h-4 flex-shrink-0" />
           Cerrar sesión

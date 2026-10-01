@@ -1,6 +1,11 @@
 import { Resend } from "resend";
-import type { AidRequestStatus, AidType } from "@/types/database";
-import { AID_TYPE_LABELS, STATUS_LABELS } from "@/lib/constants";
+import type { AidRequest, AidRequestStatus } from "@/types/database";
+import {
+  AID_TYPE_LABELS,
+  EMPLOYMENT_STATUS_LABELS,
+  STATUS_LABELS,
+} from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 
 const FROM = process.env.EMAIL_FROM ?? "Fundación Esperanza <notificaciones@jofipos.lat>";
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
@@ -136,6 +141,59 @@ function baseTemplate(preheader: string, content: string): string {
 </html>`;
 }
 
+/**
+ * Escapa el texto que escribe el solicitante antes de incrustarlo en el HTML
+ * del correo. Sin esto, un "<" en la descripción rompe el mensaje y una
+ * etiqueta completa permitiría inyectar marcado en el cliente de correo de
+ * quien lo recibe.
+ */
+function esc(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** Igual que `esc`, conservando los saltos de línea del texto original. */
+function escMultiline(value: string): string {
+  return esc(value).replace(/\r?\n/g, "<br />");
+}
+
+type DetailRow = [label: string, value: string | null | undefined];
+
+/**
+ * Tabla etiqueta/valor. Las filas sin valor se omiten, así un correo no
+ * muestra una lista de campos vacíos cuando la persona solo rellenó lo
+ * obligatorio.
+ */
+function detailTable(rows: DetailRow[]): string {
+  const visible = rows.filter(([, value]) => Boolean(value && value.trim()));
+  if (visible.length === 0) return "";
+
+  const body = visible
+    .map(([label, value], i) => {
+      const border =
+        i < visible.length - 1 ? `border-bottom:1px solid ${BORDER};` : "";
+      return `<tr>
+        <td style="padding:10px 16px;color:${MUTED};font-size:13px;${border}">${esc(label)}</td>
+        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};${border}">${value}</td>
+      </tr>`;
+    })
+    .join("");
+
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BORDER};margin:0 0 20px;">${body}</table>`;
+}
+
+/** Bloque de texto largo (descripción, motivo, observaciones). */
+function textBlock(label: string, value: string | null | undefined): string {
+  if (!value || !value.trim()) return "";
+  return `
+    <p style="color:${MUTED};font-size:12px;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 6px;">${esc(label)}</p>
+    <p style="color:${INK};font-size:14px;line-height:1.6;margin:0 0 20px;border-left:3px solid ${BORDER};padding-left:12px;">${escMultiline(value)}</p>
+  `;
+}
+
 function button(text: string, url: string): string {
   return `<table cellpadding="0" cellspacing="0" style="margin:24px 0;">
     <tr>
@@ -162,7 +220,7 @@ export async function sendWelcomeEmail({
   firstName: string;
 }) {
   const content = `
-    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${esc(firstName)},</p>
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">
       Tu cuenta en ${APP_NAME} quedó creada. Desde tu panel puedes registrar una
       solicitud de ayuda y ver en qué etapa se encuentra cada una.
@@ -180,51 +238,93 @@ export async function sendWelcomeEmail({
 }
 
 // ─── Confirmación de solicitud ─────────────────────────────────────────────────
+//
+// Incluye todo lo que la persona declaró. Es el comprobante de lo enviado: si
+// un dato quedó mal, lo ve aquí y puede avisarnos antes de que el caso avance.
 export async function sendAidRequestConfirmationEmail({
   to,
   firstName,
-  code,
-  aidType,
-  createdAt,
+  request,
 }: {
   to: string;
   firstName: string;
-  code: string;
-  aidType: AidType;
-  createdAt: Date;
+  request: AidRequest;
 }) {
+  const createdAt = new Date(request.createdAt);
+
+  const resumen = detailTable([
+    ["Código", `<span style="font-family:monospace;">${esc(request.code)}</span>`],
+    ["Tipo de ayuda", esc(AID_TYPE_LABELS[request.aidType])],
+    [
+      "Fecha de registro",
+      new Intl.DateTimeFormat("es-ES", { dateStyle: "long" }).format(createdAt),
+    ],
+    ["Estado actual", esc(STATUS_LABELS[request.status])],
+  ]);
+
+  const situacion = detailTable([
+    [
+      "Monto solicitado",
+      request.requestedAmount != null
+        ? `${formatCurrency(Number(request.requestedAmount))} USD`
+        : null,
+    ],
+    [
+      "Personas en el hogar",
+      request.householdSize != null ? String(request.householdSize) : null,
+    ],
+    [
+      "Situación laboral",
+      request.employmentStatus
+        ? esc(EMPLOYMENT_STATUS_LABELS[request.employmentStatus])
+        : null,
+    ],
+    [
+      "Ingresos mensuales",
+      request.monthlyIncome != null
+        ? `${formatCurrency(Number(request.monthlyIncome))} USD`
+        : null,
+    ],
+    ["Teléfono de contacto", request.contactPhone ? esc(request.contactPhone) : null],
+    [
+      "Dirección de contacto",
+      request.contactAddress ? esc(request.contactAddress) : null,
+    ],
+  ]);
+
   const content = `
-    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${esc(firstName)},</p>
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 20px;">
-      Registramos tu solicitud de ayuda con los siguientes datos:
+      Registramos tu solicitud de ayuda. Este es el detalle de lo que enviaste:
     </p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BORDER};margin:0 0 20px;">
-      <tr>
-        <td style="padding:10px 16px;color:${MUTED};font-size:13px;border-bottom:1px solid ${BORDER};">Código</td>
-        <td style="padding:10px 16px;text-align:right;font-family:monospace;font-size:14px;color:${INK};border-bottom:1px solid ${BORDER};">${code}</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 16px;color:${MUTED};font-size:13px;border-bottom:1px solid ${BORDER};">Tipo de ayuda</td>
-        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};border-bottom:1px solid ${BORDER};">${AID_TYPE_LABELS[aidType]}</td>
-      </tr>
-      <tr>
-        <td style="padding:10px 16px;color:${MUTED};font-size:13px;">Fecha</td>
-        <td style="padding:10px 16px;text-align:right;font-size:14px;color:${INK};">${new Intl.DateTimeFormat("es-ES", { dateStyle: "long" }).format(createdAt)}</td>
-      </tr>
-    </table>
+
+    ${resumen}
+
+    ${textBlock("Descripción de la situación", request.description)}
+    ${textBlock("Motivo de la solicitud", request.reason)}
+
+    ${situacion ? `<p style="color:${MUTED};font-size:12px;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 6px;">Datos del hogar y contacto</p>${situacion}` : ""}
+
+    ${textBlock("Observaciones", request.observations)}
+
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 8px;">
-      ${tag("Estado actual: Solicitud recibida", ACCENT)}
+      ${tag(`Estado actual: ${STATUS_LABELS[request.status]}`, ACCENT)}
     </p>
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:16px 0;">
       Un miembro de nuestro equipo revisará el caso. Te avisaremos por este mismo
-      medio cada vez que cambie de estado.
+      medio cada vez que cambie de estado. Si algún dato no es correcto,
+      respóndenos a este correo indicando el código ${esc(request.code)}.
     </p>
     ${button("Ver mi solicitud", `${APP_URL}/solicitudes`)}
   `;
+
   return deliver({
     to,
-    subject: `Solicitud ${code} recibida`,
-    html: baseTemplate(`Registramos tu solicitud ${code}.`, content),
+    subject: `Solicitud ${request.code} recibida`,
+    html: baseTemplate(
+      `Registramos tu solicitud ${request.code} de ${AID_TYPE_LABELS[request.aidType]}.`,
+      content
+    ),
   });
 }
 
@@ -249,9 +349,9 @@ export async function sendStatusChangeEmail({
   const statusColor = isPositive ? "#2f6e4a" : isRejected ? "#a33a3a" : ACCENT;
 
   const content = `
-    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${firstName},</p>
+    <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 16px;">Hola ${esc(firstName)},</p>
     <p style="color:${INK};font-size:15px;line-height:1.6;margin:0 0 20px;">
-      El estado de tu solicitud <span style="font-family:monospace;">${code}</span> cambió.
+      El estado de tu solicitud <span style="font-family:monospace;">${esc(code)}</span> cambió.
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${BORDER};margin:0 0 20px;">
       <tr>
@@ -265,7 +365,7 @@ export async function sendStatusChangeEmail({
     </table>
     ${
       userComment
-        ? `<p style="color:${INK};font-size:14px;line-height:1.6;margin:0 0 20px;border-left:3px solid ${BORDER};padding-left:12px;">${userComment}</p>`
+        ? `<p style="color:${INK};font-size:14px;line-height:1.6;margin:0 0 20px;border-left:3px solid ${BORDER};padding-left:12px;">${escMultiline(userComment)}</p>`
         : ""
     }
     ${button("Ver detalles de mi solicitud", `${APP_URL}/solicitudes`)}

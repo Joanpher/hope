@@ -18,7 +18,7 @@ import {
 // a secas sería ambiguo en las tablas con más de un enlace hacia usuarios.
 
 const USER_SUMMARY =
-  "id,firstName,lastName,email,phone,documentId,address,city,province";
+  "id,firstName,lastName,email,phone,documentId,address,city,province,country";
 
 const HISTORY_WITH_AUTHOR = `history:aid_request_history!aid_request_history_aidRequestId_fkey(
   *,
@@ -174,7 +174,7 @@ export async function getAllAidRequests(params?: {
   let query = supabase
     .from("aid_requests")
     .select(
-      `*, user:users!aid_requests_userId_fkey(firstName,lastName,email,documentId)`,
+      `*, user:users!aid_requests_userId_fkey(firstName,lastName,email,documentId,phone)`,
       { count: "exact" }
     );
 

@@ -25,7 +25,7 @@ function RequestStepper({ status }: { status: AidRequestStatus }) {
       <div className={`flex items-center gap-3 p-4 rounded-xl border ${
         status === "REJECTED"
           ? "bg-red-50 border-red-200 text-red-700"
-          : "bg-slate-50 border-slate-200 text-slate-600"
+          : "bg-mist border-line text-ink-muted"
       }`}>
         <XCircle className="w-5 h-5 flex-shrink-0" />
         <div>
@@ -44,9 +44,9 @@ function RequestStepper({ status }: { status: AidRequestStatus }) {
     <div className="relative">
       {/* Desktop stepper */}
       <div className="hidden sm:flex items-center justify-between relative">
-        <div className="absolute top-5 left-5 right-5 h-0.5 bg-slate-200" />
+        <div className="absolute top-5 left-5 right-5 h-0.5 bg-line" />
         <div
-          className="absolute top-5 left-5 h-0.5 bg-gradient-to-r from-blue-500 to-teal-500 transition-all"
+          className="absolute top-5 left-5 h-0.5 brand-gradient transition-all"
           style={{ width: currentStep > 0 ? `${(currentStep / (STATUS_FLOW.length - 1)) * (100 - 40 / 6)}%` : "0%" }}
         />
         {STATUS_FLOW.map((s, i) => {
@@ -57,10 +57,10 @@ function RequestStepper({ status }: { status: AidRequestStatus }) {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                   isDone
-                    ? "bg-green-500 border-green-500"
+                    ? "bg-leaf border-leaf"
                     : isActive
-                    ? "bg-blue-600 border-blue-600 ring-4 ring-blue-100"
-                    : "bg-white border-slate-300"
+                    ? "bg-navy border-navy ring-4 ring-navy/10"
+                    : "bg-white border-line"
                 }`}
               >
                 {isDone ? (
@@ -68,12 +68,12 @@ function RequestStepper({ status }: { status: AidRequestStatus }) {
                 ) : isActive ? (
                   <Clock className="w-5 h-5 text-white" />
                 ) : (
-                  <Circle className="w-4 h-4 text-slate-300" />
+                  <Circle className="w-4 h-4 text-ink-muted/40" />
                 )}
               </div>
               <span
                 className={`text-xs font-medium text-center max-w-[70px] leading-tight ${
-                  isActive ? "text-blue-700" : isDone ? "text-green-700" : "text-slate-400"
+                  isActive ? "text-navy" : isDone ? "text-leaf-dark" : "text-ink-muted"
                 }`}
               >
                 {STATUS_LABELS[s]}
@@ -86,18 +86,18 @@ function RequestStepper({ status }: { status: AidRequestStatus }) {
       {/* Mobile stepper */}
       <div className="sm:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-slate-700">Progreso</span>
+          <span className="text-sm font-semibold text-ink">Progreso</span>
           <span className="text-sm font-semibold brand-gradient-text">
             Paso {currentStep + 1} de {STATUS_FLOW.length}
           </span>
         </div>
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-line/60 rounded-full overflow-hidden">
           <div
             className="h-full brand-gradient rounded-full transition-all"
             style={{ width: `${((currentStep) / (STATUS_FLOW.length - 1)) * 100}%` }}
           />
         </div>
-        <p className="text-sm font-semibold text-blue-700 mt-2">{STATUS_LABELS[status]}</p>
+        <p className="text-sm font-semibold text-navy mt-2">{STATUS_LABELS[status]}</p>
       </div>
     </div>
   );
@@ -125,13 +125,13 @@ export default async function SolicitudDetailPage({
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <Link href="/solicitudes">
-          <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-line hover:bg-mist transition-colors">
+            <ArrowLeft className="w-5 h-5 text-ink-muted" />
           </button>
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 font-mono">{request.code}</h1>
-          <p className="text-slate-500 text-sm">{AID_TYPE_LABELS[request.aidType]}</p>
+          <h1 className="text-xl font-bold text-navy font-mono">{request.code}</h1>
+          <p className="text-ink-muted text-sm">{AID_TYPE_LABELS[request.aidType]}</p>
         </div>
         <div className="ml-auto">
           <span className={`status-badge ${STATUS_COLORS[request.status]}`}>
@@ -144,7 +144,7 @@ export default async function SolicitudDetailPage({
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-base">Progreso de la solicitud</CardTitle>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-ink-muted">
             Última actualización:{" "}
             {formatDateTime(request.updatedAt)}
           </p>
@@ -161,32 +161,32 @@ export default async function SolicitudDetailPage({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="bg-slate-50 rounded-xl p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Código</p>
-              <p className="font-mono font-bold text-slate-900">{request.code}</p>
+            <div className="bg-mist rounded-xl p-4">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-1">Código</p>
+              <p className="font-mono font-bold text-ink">{request.code}</p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Fecha de registro</p>
-              <p className="font-medium text-slate-900">{formatDate(request.createdAt)}</p>
+            <div className="bg-mist rounded-xl p-4">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-1">Fecha de registro</p>
+              <p className="font-medium text-ink">{formatDate(request.createdAt)}</p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Tipo de ayuda</p>
-              <p className="font-medium text-slate-900">{AID_TYPE_LABELS[request.aidType]}</p>
+            <div className="bg-mist rounded-xl p-4">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-1">Tipo de ayuda</p>
+              <p className="font-medium text-ink">{AID_TYPE_LABELS[request.aidType]}</p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Estado actual</p>
+            <div className="bg-mist rounded-xl p-4">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-1">Estado actual</p>
               <span className={`status-badge ${STATUS_COLORS[request.status]}`}>
                 {STATUS_LABELS[request.status]}
               </span>
             </div>
           </div>
           <div>
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Descripción de la situación</p>
-            <p className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl text-sm">{request.description}</p>
+            <p className="text-xs text-ink-muted uppercase tracking-wider mb-2">Descripción de la situación</p>
+            <p className="text-ink leading-relaxed bg-mist p-4 rounded-xl text-sm">{request.description}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Motivo de la solicitud</p>
-            <p className="text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl text-sm">{request.reason}</p>
+            <p className="text-xs text-ink-muted uppercase tracking-wider mb-2">Motivo de la solicitud</p>
+            <p className="text-ink leading-relaxed bg-mist p-4 rounded-xl text-sm">{request.reason}</p>
           </div>
         </CardContent>
       </Card>
@@ -198,35 +198,35 @@ export default async function SolicitudDetailPage({
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-100" />
+            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-line" />
             <div className="space-y-6">
               {request.history.map((entry, i) => (
                 <div key={entry.id} className="flex gap-4 relative">
-                  <div className="w-8 h-8 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center flex-shrink-0 z-10">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                  <div className="w-8 h-8 rounded-full bg-white border-2 border-leaf-soft flex items-center justify-center flex-shrink-0 z-10">
+                    <CheckCircle2 className="w-4 h-4 text-leaf" />
                   </div>
                   <div className="flex-1 pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="font-semibold text-slate-900 text-sm">
+                        <p className="font-semibold text-ink text-sm">
                           {STATUS_LABELS[entry.newStatus as AidRequestStatus]}
                         </p>
                         {entry.changedBy && (
-                          <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-ink-muted flex items-center gap-1 mt-0.5">
                             <User className="w-3 h-3" />
                             {entry.changedBy.firstName} {entry.changedBy.lastName}
                           </p>
                         )}
                       </div>
-                      <span className="text-xs text-slate-400 flex-shrink-0">
+                      <span className="text-xs text-ink-muted flex-shrink-0">
                         {formatDateTime(entry.createdAt)}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 mt-1">{entry.description}</p>
+                    <p className="text-sm text-ink-muted mt-1">{entry.description}</p>
                     {entry.userComment && (
-                      <div className="mt-2 flex gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
-                        <MessageSquare className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-blue-800">{entry.userComment}</p>
+                      <div className="mt-2 flex gap-2 bg-mist border border-line rounded-xl p-3">
+                        <MessageSquare className="w-4 h-4 text-leaf flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-ink">{entry.userComment}</p>
                       </div>
                     )}
                   </div>

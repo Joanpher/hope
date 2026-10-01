@@ -11,7 +11,6 @@ import {
   XCircle,
   ArrowRight,
   Bell,
-  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,56 +45,32 @@ export default async function DashboardPage() {
     <div className="animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          ¡Hola, {session.user.firstName}! 👋
+        <h1 className="text-2xl font-bold text-navy">
+          ¡Hola, {session.user.firstName}!
         </h1>
-        <p className="text-slate-500 mt-1">
+        <p className="text-ink-muted mt-1">
           Aquí está el resumen de tus solicitudes de ayuda.
         </p>
       </div>
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <FileText className="w-5 h-5 text-blue-100" />
-              <TrendingUp className="w-4 h-4 text-blue-200" />
-            </div>
-            <div className="text-3xl font-bold">{total}</div>
-            <div className="text-sm text-blue-100 mt-1">Total solicitudes</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-400 to-orange-500 text-white">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <Clock className="w-5 h-5 text-amber-100" />
-            </div>
-            <div className="text-3xl font-bold">{active}</div>
-            <div className="text-sm text-amber-100 mt-1">En progreso</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-emerald-400 to-green-600 text-white">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-100" />
-            </div>
-            <div className="text-3xl font-bold">{completed}</div>
-            <div className="text-sm text-emerald-100 mt-1">Completadas</div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-400 to-slate-600 text-white">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <XCircle className="w-5 h-5 text-slate-100" />
-            </div>
-            <div className="text-3xl font-bold">{rejected}</div>
-            <div className="text-sm text-slate-200 mt-1">Rechazadas</div>
-          </CardContent>
-        </Card>
+        {[
+          { label: "Total solicitudes", value: total, icon: FileText, tint: "bg-navy/10 text-navy" },
+          { label: "En progreso", value: active, icon: Clock, tint: "bg-amber-50 text-amber-600" },
+          { label: "Completadas", value: completed, icon: CheckCircle2, tint: "bg-leaf-soft text-leaf-dark" },
+          { label: "Rechazadas", value: rejected, icon: XCircle, tint: "bg-slate-100 text-slate-500" },
+        ].map((stat) => (
+          <Card key={stat.label}>
+            <CardContent className="p-5">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${stat.tint}`}>
+                <stat.icon className="w-4.5 h-4.5" />
+              </div>
+              <div className="text-3xl font-bold text-navy">{stat.value}</div>
+              <div className="text-sm text-ink-muted mt-1">{stat.label}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -113,13 +88,13 @@ export default async function DashboardPage() {
             <CardContent>
               {recentRequests.length === 0 ? (
                 <div className="empty-state py-12">
-                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-blue-400" />
+                  <div className="w-16 h-16 bg-leaf-soft rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-leaf" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                  <h3 className="text-lg font-semibold text-ink mb-2">
                     No tienes solicitudes
                   </h3>
-                  <p className="text-slate-400 text-sm mb-6">
+                  <p className="text-ink-muted text-sm mb-6">
                     Aún no has creado ninguna solicitud de ayuda.
                   </p>
                   <Link href="/solicitudes/nueva">
@@ -135,17 +110,17 @@ export default async function DashboardPage() {
                     <Link
                       key={req.id}
                       href={`/solicitudes/${req.id}`}
-                      className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all group"
+                      className="flex items-center justify-between p-4 rounded-xl bg-mist hover:bg-leaf-soft/60 border border-transparent hover:border-leaf/20 transition-all group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 brand-gradient rounded-xl flex items-center justify-center flex-shrink-0">
                           <FileText className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 text-sm truncate">
+                          <p className="font-semibold text-ink text-sm truncate">
                             {req.code}
                           </p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-ink-muted">
                             {AID_TYPE_LABELS[req.aidType]} · {formatShortDate(req.createdAt)}
                           </p>
                         </div>
@@ -156,7 +131,7 @@ export default async function DashboardPage() {
                         >
                           {STATUS_LABELS[req.status]}
                         </span>
-                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                        <ArrowRight className="w-4 h-4 text-ink-muted/40 group-hover:text-leaf transition-colors" />
                       </div>
                     </Link>
                   ))}
@@ -188,20 +163,20 @@ export default async function DashboardPage() {
             <CardContent>
               {notifications.length === 0 ? (
                 <div className="text-center py-8">
-                  <Bell className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                  <p className="text-sm text-slate-400">Sin notificaciones nuevas</p>
+                  <Bell className="w-10 h-10 text-line mx-auto mb-3" />
+                  <p className="text-sm text-ink-muted">Sin notificaciones nuevas</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {notifications.map((n) => (
                     <div
                       key={n.id}
-                      className="p-3 rounded-xl bg-blue-50 border border-blue-100"
+                      className="p-3 rounded-xl bg-leaf-soft/50 border border-leaf/15"
                     >
-                      <p className="text-sm font-semibold text-slate-900 mb-0.5">
+                      <p className="text-sm font-semibold text-ink mb-0.5">
                         {n.title}
                       </p>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-ink-muted leading-relaxed">
                         {n.message}
                       </p>
                     </div>
@@ -216,11 +191,11 @@ export default async function DashboardPage() {
             <CardContent className="p-5 text-center">
               <PlusCircle className="w-8 h-8 text-white mx-auto mb-3" />
               <h3 className="font-bold text-white mb-1">¿Necesitas ayuda?</h3>
-              <p className="text-blue-100 text-xs mb-4">
+              <p className="text-leaf-soft/90 text-xs mb-4">
                 Crea una nueva solicitud y nuestro equipo la revisará.
               </p>
               <Link href="/solicitudes/nueva">
-                <button className="w-full py-2 px-4 bg-white text-blue-700 rounded-lg font-semibold text-sm hover:bg-blue-50 transition-colors">
+                <button className="w-full py-2 px-4 bg-white text-leaf-dark rounded-lg font-semibold text-sm hover:bg-leaf-soft transition-colors">
                   Nueva solicitud
                 </button>
               </Link>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COUNTRY_CODES } from "@/lib/countries";
 
 export const LoginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -25,6 +26,7 @@ export const RegisterSchema = z
     address: z.string().min(5, "Escribe tu dirección"),
     city: z.string().min(2, "Escribe tu ciudad o municipio"),
     province: z.string().min(2, "Escribe tu provincia o estado"),
+    country: z.enum(COUNTRY_CODES, { message: "Selecciona tu país" }),
     password: z
       .string()
       .min(8, "La contraseña debe tener al menos 8 caracteres")

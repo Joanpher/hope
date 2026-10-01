@@ -72,6 +72,8 @@ export interface User {
   address: string | null;
   city: string | null;
   province: string | null;
+  /** Código ISO 3166-1 alfa-2 (ver src/lib/countries.ts). */
+  country: string;
   acceptedTerms: boolean;
   acceptedTermsAt: string | null;
   createdAt: string;
@@ -86,9 +88,11 @@ export interface AidRequest {
   aidType: AidType;
   description: string;
   reason: string;
+  /** Siempre en USD, sin importar el país del solicitante. */
   requestedAmount: number | null;
   householdSize: number | null;
   employmentStatus: EmploymentStatus | null;
+  /** Siempre en USD, sin importar el país del solicitante. */
   monthlyIncome: number | null;
   contactPhone: string | null;
   contactAddress: string | null;
@@ -167,6 +171,7 @@ export type UserSummary = Pick<
   | "address"
   | "city"
   | "province"
+  | "country"
 >;
 
 export type HistoryWithAuthor = AidRequestHistory & {
@@ -180,7 +185,7 @@ export type AidRequestWithRelations = AidRequest & {
 };
 
 export type AidRequestWithUser = AidRequest & {
-  user: Pick<User, "firstName" | "lastName" | "email" | "documentId">;
+  user: Pick<User, "firstName" | "lastName" | "email" | "documentId" | "phone">;
 };
 
 export type AidRequestWithHistory = AidRequest & {

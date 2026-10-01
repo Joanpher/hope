@@ -19,7 +19,7 @@ export default async function NotificacionesPage() {
     <div className="max-w-2xl mx-auto animate-fade-in">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-navy flex items-center gap-2">
             <Bell className="w-6 h-6" />
             Notificaciones
             {unread > 0 && (
@@ -28,7 +28,7 @@ export default async function NotificacionesPage() {
               </span>
             )}
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-ink-muted mt-1">
             {unread > 0
               ? `Tienes ${unread} notificación${unread !== 1 ? "es" : ""} sin leer.`
               : "Todas las notificaciones leídas."}

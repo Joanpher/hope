@@ -8,6 +8,7 @@ import { updateProfile } from "@/server/actions/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { COUNTRIES } from "@/lib/countries";
 
 interface ProfileFormProps {
   initialData: UpdateProfileInput;
@@ -76,6 +77,19 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           <Label htmlFor="province">Provincia</Label>
           <Input id="province" className="mt-1.5" {...register("province")} />
         </div>
+      </div>
+      <div>
+        <Label htmlFor="country">País *</Label>
+        <select
+          id="country"
+          className="mt-1.5 flex h-10 w-full rounded-lg border border-line bg-white px-3.5 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-leaf/20 focus:border-leaf transition-all duration-200"
+          {...register("country")}
+        >
+          {COUNTRIES.map((c) => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
+        {errors.country && <p className="text-xs text-red-500 mt-1">{errors.country.message}</p>}
       </div>
 
       <Button type="submit" disabled={isPending} id="btn-save-profile">

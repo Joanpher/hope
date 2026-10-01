@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { getInitials } from "@/lib/utils";
 import { User, Lock, Shield } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { COUNTRY_CODES, type CountryCode } from "@/lib/countries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Mi Perfil" };
@@ -22,31 +23,31 @@ export default async function PerfilPage() {
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Mi Perfil</h1>
-        <p className="text-slate-500 mt-1">Gestiona tu información personal y seguridad de cuenta.</p>
+        <h1 className="text-2xl font-bold text-navy">Mi Perfil</h1>
+        <p className="text-ink-muted mt-1">Gestiona tu información personal y seguridad de cuenta.</p>
       </div>
 
       {/* Avatar card */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 brand-gradient rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 brand-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-leaf/20">
               <span className="text-2xl font-bold text-white">
                 {getInitials(user.firstName, user.lastName)}
               </span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-navy">
                 {user.firstName} {user.lastName}
               </h2>
-              <p className="text-slate-500 text-sm">{user.email}</p>
+              <p className="text-ink-muted text-sm">{user.email}</p>
               <div className="flex items-center gap-2 mt-1">
-                <Shield className="w-3.5 h-3.5 text-blue-500" />
-                <span className="text-xs text-blue-600 font-medium">
+                <Shield className="w-3.5 h-3.5 text-leaf" />
+                <span className="text-xs text-leaf-dark font-medium">
                   {user.role === "ADMIN" ? "Administrador" : "Beneficiario"}
                 </span>
-                <span className="text-xs text-slate-400">·</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-ink-muted/60">·</span>
+                <span className="text-xs text-ink-muted">
                   Miembro desde {formatDate(user.createdAt)}
                 </span>
               </div>
@@ -65,22 +66,22 @@ export default async function PerfilPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">Documento / Cédula</p>
-              <p className="text-sm font-medium text-slate-900 font-mono">{user.documentId}</p>
+            <div className="bg-mist rounded-xl p-3">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-0.5">Documento / Cédula</p>
+              <p className="text-sm font-medium text-ink font-mono">{user.documentId}</p>
             </div>
-            <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">Correo electrónico</p>
-              <p className="text-sm font-medium text-slate-900">{user.email}</p>
+            <div className="bg-mist rounded-xl p-3">
+              <p className="text-xs text-ink-muted uppercase tracking-wider mb-0.5">Correo electrónico</p>
+              <p className="text-sm font-medium text-ink">{user.email}</p>
             </div>
             {user.birthDate && (
-              <div className="bg-slate-50 rounded-xl p-3">
-                <p className="text-xs text-slate-400 uppercase tracking-wider mb-0.5">Fecha de nacimiento</p>
-                <p className="text-sm font-medium text-slate-900">{formatDate(user.birthDate)}</p>
+              <div className="bg-mist rounded-xl p-3">
+                <p className="text-xs text-ink-muted uppercase tracking-wider mb-0.5">Fecha de nacimiento</p>
+                <p className="text-sm font-medium text-ink">{formatDate(user.birthDate)}</p>
               </div>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-3">
+          <p className="text-xs text-ink-muted mt-3">
             Para modificar estos datos, contacta a la fundación directamente.
           </p>
         </CardContent>
@@ -101,6 +102,9 @@ export default async function PerfilPage() {
               address: user.address ?? "",
               city: user.city ?? "",
               province: user.province ?? "",
+              country: (COUNTRY_CODES as readonly string[]).includes(user.country)
+                ? (user.country as CountryCode)
+                : "OTHER",
             }}
           />
         </CardContent>

@@ -10,11 +10,12 @@ import {
   Bell,
   User,
   LogOut,
-  Heart,
+  Shield,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
+import type { UserRole } from "@/types/database";
 import { useState } from "react";
 
 const navItems = [
@@ -30,6 +31,7 @@ interface DashboardSidebarProps {
     firstName: string;
     lastName: string;
     email: string;
+    role?: UserRole;
   };
   unreadCount?: number;
 }
@@ -44,21 +46,21 @@ export function DashboardSidebar({
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col h-screen bg-white border-r border-slate-200 transition-all duration-300 sticky top-0 z-40",
+        "hidden md:flex flex-col h-screen bg-navy border-r border-navy-deep transition-all duration-300 sticky top-0 z-40",
         collapsed ? "w-16" : "w-64"
       )}
     >
       {/* Logo */}
       <div
         className={cn(
-          "flex items-center gap-3 p-5 border-b border-slate-100",
+          "flex items-center gap-3 p-5 border-b border-white/10",
           collapsed && "justify-center p-3"
         )}
       >
         {collapsed ? (
-          <BrandLogo variant="mark" className="h-9" />
+          <BrandLogo variant="mark" tone="white" className="h-9" />
         ) : (
-          <BrandLogo className="h-10" />
+          <BrandLogo tone="white" className="h-10" />
         )}
       </div>
 
@@ -77,8 +79,8 @@ export function DashboardSidebar({
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative",
                 collapsed && "justify-center px-2",
                 isActive
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  ? "bg-leaf text-white shadow-md shadow-leaf/20"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
               title={collapsed ? item.label : undefined}
             >
@@ -92,7 +94,7 @@ export function DashboardSidebar({
                   className={cn(
                     "flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold",
                     collapsed ? "absolute -top-1 -right-1" : "ml-auto",
-                    isActive ? "bg-white text-blue-600" : "bg-red-500 text-white"
+                    isActive ? "bg-white text-leaf-dark" : "bg-red-500 text-white"
                   )}
                 >
                   {unreadCount > 9 ? "9+" : unreadCount}
@@ -103,20 +105,39 @@ export function DashboardSidebar({
         })}
       </nav>
 
+      {/* Acceso al panel administrativo: solo para quien tiene el rol. El
+          middleware ya bloquea /admin, esto únicamente evita tener que
+          escribir la URL a mano. */}
+      {user.role === "ADMIN" && (
+        <div className="px-3 pb-3">
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium border border-white/15 text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200",
+              collapsed && "justify-center px-2"
+            )}
+            title={collapsed ? "Panel administrativo" : undefined}
+          >
+            <Shield className="w-4 h-4 flex-shrink-0" />
+            {!collapsed && <span className="truncate">Panel administrativo</span>}
+          </Link>
+        </div>
+      )}
+
       {/* User section */}
-      <div className="border-t border-slate-100 p-3 space-y-1">
+      <div className="border-t border-white/10 p-3 space-y-1">
         {!collapsed && (
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 brand-gradient rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-leaf rounded-full flex items-center justify-center flex-shrink-0">
               <span className="text-xs font-bold text-white">
                 {getInitials(user.firstName, user.lastName)}
               </span>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">
+              <p className="text-sm font-semibold text-white truncate">
                 {user.firstName} {user.lastName}
               </p>
-              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+              <p className="text-xs text-white/50 truncate">{user.email}</p>
             </div>
           </div>
         )}
@@ -124,7 +145,7 @@ export function DashboardSidebar({
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-200",
+            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200",
             collapsed && "justify-center px-2"
           )}
           title={collapsed ? "Cerrar sesión" : undefined}
@@ -137,7 +158,7 @@ export function DashboardSidebar({
         <button
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-100 transition-colors",
+            "flex items-center gap-3 w-full px-3 py-2 rounded-lg text-xs font-medium text-white/40 hover:bg-white/10 hover:text-white/70 transition-colors",
             collapsed && "justify-center"
           )}
         >

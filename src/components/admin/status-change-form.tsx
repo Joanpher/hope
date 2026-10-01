@@ -15,6 +15,15 @@ const STATUS_FLOW: AidRequestStatus[] = [
   "APPROVED", "PREPARING", "DELIVERED", "REJECTED", "CANCELLED",
 ];
 
+/**
+ * Recorrido habitual de un caso que avanza sin incidencias. Se usa para
+ * ofrecer el siguiente paso de un clic; los desvíos (pedir documentos,
+ * rechazar, cancelar) se siguen eligiendo a mano en el desplegable.
+ */
+const HAPPY_PATH: AidRequestStatus[] = [
+  "RECEIVED", "IN_REVIEW", "EVALUATION", "APPROVED", "PREPARING", "DELIVERED",
+];
+
 interface StatusChangeFormProps {
   requestId: string;
   currentStatus: AidRequestStatus;
@@ -30,6 +39,12 @@ export function StatusChangeForm({ requestId, currentStatus, userEmail }: Status
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  const currentIndex = HAPPY_PATH.indexOf(currentStatus);
+  const nextStatus =
+    currentIndex >= 0 && currentIndex < HAPPY_PATH.length - 1
+      ? HAPPY_PATH[currentIndex + 1]
+      : null;
 
   const handleSubmit = () => {
     if (newStatus === currentStatus) {
@@ -75,7 +90,7 @@ export function StatusChangeForm({ requestId, currentStatus, userEmail }: Status
 
         <div>
           <Label>Estado actual</Label>
-          <div className="mt-1.5 px-3 py-2 bg-slate-50 rounded-lg text-sm font-medium text-slate-700">
+          <div className="mt-1.5 px-3 py-2 bg-mist rounded-lg text-sm font-medium text-ink">
             {STATUS_LABELS[currentStatus]}
           </div>
         </div>
@@ -86,12 +101,21 @@ export function StatusChangeForm({ requestId, currentStatus, userEmail }: Status
             id="newStatus"
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value as AidRequestStatus)}
-            className="w-full mt-1.5 px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+            className="w-full mt-1.5 px-3 py-2 text-sm border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-leaf/20 focus:border-leaf bg-white"
           >
             {STATUS_FLOW.map((s) => (
               <option key={s} value={s}>{STATUS_LABELS[s]}</option>
             ))}
           </select>
+          {nextStatus && newStatus !== nextStatus && (
+            <button
+              type="button"
+              onClick={() => setNewStatus(nextStatus)}
+              className="mt-2 text-xs font-bold text-leaf-dark hover:underline"
+            >
+              Avanzar al siguiente paso: {STATUS_LABELS[nextStatus]}
+            </button>
+          )}
         </div>
 
         <div>
@@ -116,19 +140,19 @@ export function StatusChangeForm({ requestId, currentStatus, userEmail }: Status
           />
         </div>
 
-        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+        <div className="flex items-center gap-3 p-3 bg-mist rounded-xl">
           <input
             id="sendEmail"
             type="checkbox"
             checked={sendEmail}
             onChange={(e) => setSendEmail(e.target.checked)}
-            className="w-4 h-4 rounded text-blue-600"
+            className="w-4 h-4 rounded accent-leaf"
           />
-          <div>
-            <label htmlFor="sendEmail" className="text-sm font-medium text-slate-700 cursor-pointer">
+          <div className="min-w-0">
+            <label htmlFor="sendEmail" className="text-sm font-medium text-ink cursor-pointer">
               Notificar al usuario por correo
             </label>
-            <p className="text-xs text-slate-400">{userEmail}</p>
+            <p className="text-xs text-ink-muted truncate">{userEmail}</p>
           </div>
         </div>
 

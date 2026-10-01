@@ -1,18 +1,16 @@
 import { z } from "zod";
 import { AID_TYPES, EMPLOYMENT_STATUSES } from "@/types/database";
+import { COUNTRY_CODES } from "@/lib/countries";
 
 export const AidRequestSchema = z.object({
   aidType: z.enum(AID_TYPES, {
     message: "Selecciona un tipo de ayuda",
   }),
-  description: z
-    .string()
-    .min(50, "Describe tu situación con al menos 50 caracteres")
-    .max(2000),
-  reason: z
-    .string()
-    .min(20, "El motivo debe tener al menos 20 caracteres")
-    .max(1000),
+  // Sin longitud mínima: quien pide ayuda escribe lo que puede, y un contador
+  // de caracteres no es motivo para bloquearle el envío. La cadena vacía es
+  // válida y satisface el NOT NULL de ambas columnas.
+  description: z.string().max(2000),
+  reason: z.string().max(1000),
   requestedAmount: z.string().optional().or(z.literal("")),
   householdSize: z
     .string()
@@ -26,7 +24,7 @@ export const AidRequestSchema = z.object({
     .optional()
     .or(z.literal("")),
   monthlyIncome: z.string().optional().or(z.literal("")),
-  contactPhone: z.string().min(7, "Teléfono inválido").optional().or(z.literal("")),
+  contactPhone: z.string().optional().or(z.literal("")),
   contactAddress: z.string().optional().or(z.literal("")),
   observations: z.string().max(500).optional().or(z.literal("")),
 });
@@ -45,6 +43,7 @@ export const UpdateProfileSchema = z.object({
   address: z.string().optional().or(z.literal("")),
   city: z.string().optional().or(z.literal("")),
   province: z.string().optional().or(z.literal("")),
+  country: z.enum(COUNTRY_CODES, { message: "Selecciona tu país" }),
 });
 
 export const ChangePasswordSchema = z

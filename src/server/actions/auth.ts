@@ -25,6 +25,7 @@ export async function registerUser(data: RegisterInput) {
     address,
     city,
     province,
+    country,
     password,
     acceptedTerms,
   } = validated.data;
@@ -48,6 +49,7 @@ export async function registerUser(data: RegisterInput) {
       address,
       city,
       province,
+      country,
       password: hashedPassword,
       acceptedTerms,
       acceptedTermsAt: acceptedTerms ? new Date().toISOString() : null,

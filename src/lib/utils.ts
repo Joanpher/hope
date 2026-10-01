@@ -89,15 +89,39 @@ export function generateToken(): string {
 }
 
 /**
- * Format currency
+ * Formatea un monto en USD. Toda la aplicación guarda y muestra los montos de
+ * las solicitudes de ayuda en dólares estadounidenses, sin importar el país
+ * del solicitante, para que los montos sean comparables entre países.
  */
 export function formatCurrency(amount: number | null | undefined): string {
   if (!amount && amount !== 0) return "—";
-  return new Intl.NumberFormat("es-DO", {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "DOP",
+    currency: "USD",
     minimumFractionDigits: 0,
   }).format(amount);
+}
+
+/**
+ * Enlaces de contacto para un teléfono guardado tal como lo escribió la persona.
+ *
+ * `tel:` funciona con cualquier formato, así que siempre se genera. El enlace de
+ * WhatsApp solo se ofrece cuando el número trae prefijo internacional explícito:
+ * wa.me exige el código de país y, siendo la aplicación multi-país, adivinarlo a
+ * partir de un número local llevaría a abrir chats con desconocidos.
+ */
+export function phoneLinks(phone: string | null | undefined): {
+  tel: string;
+  whatsapp: string | null;
+} | null {
+  if (!phone?.trim()) return null;
+  const digits = phone.replace(/\D/g, "");
+  if (!digits) return null;
+  const isInternational = phone.trim().startsWith("+");
+  return {
+    tel: `tel:${phone.trim().startsWith("+") ? "+" : ""}${digits}`,
+    whatsapp: isInternational ? `https://wa.me/${digits}` : null,
+  };
 }
 
 /**

@@ -10,6 +10,7 @@ import { RegisterSchema, type RegisterInput } from "@/lib/validations/auth";
 import { registerUser } from "@/server/actions/auth";
 import { AccountShell } from "@/components/site/account-shell";
 import { cn } from "@/lib/utils";
+import { COUNTRIES } from "@/lib/countries";
 
 // ─── Pasos ────────────────────────────────────────────────────────────────────
 //
@@ -27,7 +28,7 @@ const DATA_STEPS: { title: string; lead: string; fields: (keyof RegisterInput)[]
   {
     title: "Cómo contactarte",
     lead: "Te escribiremos a este correo cada vez que tu solicitud cambie de estado.",
-    fields: ["email", "phone", "address", "city", "province"],
+    fields: ["email", "phone", "country", "address", "city", "province"],
   },
   {
     title: "Protege tu cuenta",
@@ -310,6 +311,17 @@ export default function RegisterPage() {
                   <input id="phone" type="tel" inputMode="tel" autoComplete="tel" className={inputClass}
                     aria-invalid={!!errors.phone} aria-describedby={describedBy("phone", true, !!errors.phone)}
                     {...register("phone")} />
+                </Field>
+                <Field id="country" label="País" error={err("country")}>
+                  <select id="country" autoComplete="country" className={inputClass}
+                    defaultValue=""
+                    aria-invalid={!!errors.country} aria-describedby={describedBy("country", false, !!errors.country)}
+                    {...register("country")}>
+                    <option value="" disabled>Selecciona tu país</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
+                  </select>
                 </Field>
                 <Field id="address" label="Dirección" hint="Calle, número y barrio o sector." error={err("address")}>
                   <input id="address" autoComplete="street-address" className={inputClass}

@@ -7,10 +7,11 @@ Scripts SQL para reconstruir la base de datos del proyecto sobre **Supabase**.
 | `001_esquema_inicial.sql` | Crea desde cero todo: 5 tipos ENUM, 8 tablas, 29 índices, 8 claves foráneas, 2 triggers y la configuración de seguridad (RLS + permisos). | Sí |
 | `002_datos_demo.sql` | Carga datos de prueba: 7 usuarios (2 admin + 5 beneficiarios), 8 solicitudes con su bitácora completa, notificaciones y mensajes de contacto. | No |
 | `003_timestamptz.sql` | Convierte las marcas de tiempo a `timestamptz`. No destructivo. | Sí |
+| `004_pais.sql` | Añade `users.country` (soporte multi-país). No destructivo. | Sí |
 
-`001` y `002` son **destructivos**: borran lo que haya antes. `003` conserva los datos.
+`001` y `002` son **destructivos**: borran lo que haya antes. `003` y `004` conservan los datos.
 
-Orden de ejecución: **001 → 002 (opcional) → 003**.
+Orden de ejecución: **001 → 002 (opcional) → 003 → 004**.
 
 ---
 

@@ -14,17 +14,17 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm",
-      "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
+      "flex h-10 w-full items-center justify-between rounded-lg border border-line bg-white px-3.5 py-2 text-sm",
+      "focus:outline-none focus:ring-2 focus:ring-leaf/20 focus:border-leaf",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      "placeholder:text-slate-400 text-slate-900 transition-all duration-200",
+      "placeholder:text-ink-muted/60 text-ink transition-all duration-200",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 text-slate-400" />
+      <ChevronDown className="h-4 w-4 text-ink-muted" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -38,7 +38,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 min-w-[8rem] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl",
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-xl border border-line bg-white shadow-xl",
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         position === "popper" && "data-[side=bottom]:translate-y-1",
         className
@@ -61,8 +61,8 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-4 text-sm text-slate-700",
-      "focus:bg-blue-50 focus:text-blue-700 focus:outline-none",
+      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2 pl-8 pr-4 text-sm text-ink",
+      "focus:bg-leaf-soft focus:text-leaf-dark focus:outline-none",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
@@ -70,7 +70,7 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-blue-600" />
+        <Check className="h-4 w-4 text-leaf" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

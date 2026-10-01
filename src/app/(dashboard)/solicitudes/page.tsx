@@ -29,7 +29,7 @@ function StatusProgress({ status }: { status: AidRequestStatus }) {
   if (TERMINAL_STATUSES.includes(status)) {
     return (
       <div className={`flex items-center gap-2 text-xs font-medium ${
-        status === "REJECTED" ? "text-red-600" : "text-slate-500"
+        status === "REJECTED" ? "text-red-600" : "text-ink-muted"
       }`}>
         <div className={`w-2 h-2 rounded-full ${
           status === "REJECTED" ? "bg-red-500" : "bg-slate-400"
@@ -43,11 +43,11 @@ function StatusProgress({ status }: { status: AidRequestStatus }) {
   const pct = Math.round((step / total) * 100);
   return (
     <div className="w-full">
-      <div className="flex justify-between text-xs text-slate-500 mb-1">
+      <div className="flex justify-between text-xs text-ink-muted mb-1">
         <span>{STATUS_LABELS[status]}</span>
         <span>{pct}%</span>
       </div>
-      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-line/60 rounded-full overflow-hidden">
         <div
           className="h-full brand-gradient rounded-full transition-all"
           style={{ width: `${pct}%` }}
@@ -87,8 +87,8 @@ export default async function SolicitudesPage({
     <div className="animate-fade-in">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Mis Solicitudes</h1>
-          <p className="text-slate-500 mt-1">Gestiona y consulta el estado de tus solicitudes de ayuda.</p>
+          <h1 className="text-2xl font-bold text-navy">Mis Solicitudes</h1>
+          <p className="text-ink-muted mt-1">Gestiona y consulta el estado de tus solicitudes de ayuda.</p>
         </div>
         <Link href="/solicitudes/nueva">
           <Button id="btn-nueva-solicitud">
@@ -106,15 +106,15 @@ export default async function SolicitudesPage({
             href={`/solicitudes?filter=${tab.key}`}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               (filter === tab.key || (!filter && tab.key === "all"))
-                ? "brand-gradient text-white shadow-md"
-                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                ? "brand-gradient text-white shadow-md shadow-leaf/20"
+                : "bg-white border border-line text-ink-muted hover:bg-mist"
             }`}
           >
             {tab.label}
             <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
               (filter === tab.key || (!filter && tab.key === "all"))
                 ? "bg-white/20 text-white"
-                : "bg-slate-100 text-slate-500"
+                : "bg-mist text-ink-muted"
             }`}>
               {tab.count}
             </span>
@@ -123,14 +123,14 @@ export default async function SolicitudesPage({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="empty-state bg-white rounded-2xl border border-slate-100 shadow-sm">
-          <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
-            <FileText className="w-8 h-8 text-blue-400" />
+        <div className="empty-state bg-white rounded-2xl border border-line shadow-sm">
+          <div className="w-16 h-16 bg-leaf-soft rounded-2xl flex items-center justify-center mb-4">
+            <FileText className="w-8 h-8 text-leaf" />
           </div>
-          <h3 className="text-lg font-bold text-slate-700 mb-2">
+          <h3 className="text-lg font-bold text-ink mb-2">
             No tienes solicitudes en esta categoría
           </h3>
-          <p className="text-slate-400 text-sm mb-6">
+          <p className="text-ink-muted text-sm mb-6">
             {!filter || filter === "all"
               ? "Aún no has creado ninguna solicitud de ayuda."
               : "No hay solicitudes que coincidan con este filtro."}
@@ -156,15 +156,15 @@ export default async function SolicitudesPage({
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-slate-900 font-mono">{req.code}</span>
+                        <span className="font-bold text-ink font-mono">{req.code}</span>
                         <span
                           className={`status-badge ${STATUS_COLORS[req.status]}`}
                         >
                           {STATUS_LABELS[req.status]}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-500 mt-0.5">{AID_TYPE_LABELS[req.aidType]}</p>
-                      <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-400">
+                      <p className="text-sm text-ink-muted mt-0.5">{AID_TYPE_LABELS[req.aidType]}</p>
+                      <div className="flex items-center gap-1.5 mt-1 text-xs text-ink-muted/70">
                         <Calendar className="w-3 h-3" />
                         {formatShortDate(req.createdAt)}
                       </div>

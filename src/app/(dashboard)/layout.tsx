@@ -14,12 +14,13 @@ export default async function DashboardLayout({
   const unreadCount = await countUnreadNotifications(session.user.id);
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-mist">
       <DashboardSidebar
         user={{
           firstName: session.user.firstName,
           lastName: session.user.lastName,
           email: session.user.email ?? "",
+          role: session.user.role,
         }}
         unreadCount={unreadCount}
       />
