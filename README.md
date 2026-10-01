@@ -65,7 +65,19 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
 
    Si más adelante conectas un dominio propio, actualiza las tres.
-4. **Vuelve a desplegar** tras cambiar variables: Vercel no las aplica en
+
+   `APP_URL` además es de donde el correo carga el logo de la cabecera
+   (`APP_URL/brand/logo-horizontal.png`): apuntando a `localhost`, los mensajes
+   llegan sin imagen.
+4. **Revisa el remitente.** El dominio de `EMAIL_FROM` tiene que estar
+   verificado en Resend (*Domains*). Si no lo está, la API responde `403
+   validation_error` y **no se entrega ningún correo**: ni bienvenidas, ni
+   confirmaciones de solicitud, ni recuperaciones de contraseña. El fallo es
+   silencioso para quien usa la aplicación, porque el envío se registra en los
+   logs del servidor y la operación continúa. Define también `APP_NAME` y
+   `NEXT_PUBLIC_APP_NAME` con el nombre de la fundación: aparecen en los
+   correos y en el acta en PDF de cada expediente.
+5. **Vuelve a desplegar** tras cambiar variables: Vercel no las aplica en
    caliente.
 
 > No hace falta configurar nada de red en Supabase: la app habla con la API REST
