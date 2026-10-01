@@ -7,9 +7,13 @@ import {
 } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
-const FROM = process.env.EMAIL_FROM ?? "HopeRise Foundation <notificaciones@jofipos.lat>";
-const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
-const APP_NAME = process.env.APP_NAME ?? "HopeRise Foundation";
+// `||` y no `??`: en el panel del hosting es fácil dejar una variable definida
+// pero vacía, y con `??` esa cadena vacía se cuela hasta el mensaje — o hasta
+// la cabecera From, que haría fallar el envío entero.
+const FROM =
+  process.env.EMAIL_FROM?.trim() || "HopeRise Foundation <notificaciones@jofipos.lat>";
+const APP_URL = process.env.APP_URL?.trim() || "http://localhost:3000";
+const APP_NAME = process.env.APP_NAME?.trim() || "HopeRise Foundation";
 
 /**
  * Logo de la cabecera.

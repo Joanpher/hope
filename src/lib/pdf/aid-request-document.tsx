@@ -20,7 +20,10 @@ import { getCountryName } from "@/lib/countries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { AidRequestStatus, AidRequestWithRelations } from "@/types/database";
 
-const APP_NAME = process.env.APP_NAME ?? "HopeRise Foundation";
+// `||` y no `??`: una variable definida pero vacía en el panel del hosting es
+// tan inservible como una ausente, y con `??` se colaba la cadena vacía hasta
+// el documento ("Expedido por  el 1 de octubre").
+const APP_NAME = process.env.APP_NAME?.trim() || "HopeRise Foundation";
 
 // Paleta del sitio, para que el documento se lea como parte de la marca.
 const NAVY = "#0e2f52";
