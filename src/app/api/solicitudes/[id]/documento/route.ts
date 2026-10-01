@@ -30,7 +30,22 @@ export async function GET(
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const pdf = await renderAidRequestDocument(request);
+  let pdf: Buffer;
+  try {
+    pdf = await renderAidRequestDocument(request);
+  } catch (e) {
+    // Sin esto Next devuelve un 500 vacío y no hay forma de saber qué falló
+    // desde fuera del servidor. Solo llega hasta aquí quien ya pasó el control
+    // de propiedad del expediente.
+    console.error("[documento] fallo al generar el acta:", e);
+    return NextResponse.json(
+      {
+        error: "No se pudo generar el documento.",
+        detail: e instanceof Error ? e.message : String(e),
+      },
+      { status: 500 }
+    );
+  }
 
   return new NextResponse(new Uint8Array(pdf), {
     headers: {

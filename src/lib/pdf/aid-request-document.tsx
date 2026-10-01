@@ -38,15 +38,27 @@ const MIST = "#f2f5f7";
  * `public/` no viaja con la función, y sin esa opción el documento saldría
  * sin logo solo en producción.
  */
-let logoCache: { mark: Buffer; horizontal: Buffer } | null = null;
+type Logos = { mark: Buffer; horizontal: Buffer } | null;
 
-function getLogos() {
-  if (!logoCache) {
+let logoCache: Logos | undefined;
+
+/**
+ * Devuelve `null` si los PNG no están donde se esperan. El acta se emite igual,
+ * con el nombre de la fundación en texto: un adorno que no se pudo leer no es
+ * motivo para dejar a nadie sin su documento.
+ */
+function getLogos(): Logos {
+  if (logoCache === undefined) {
     const dir = path.join(process.cwd(), "public", "brand");
-    logoCache = {
-      mark: fs.readFileSync(path.join(dir, "logo-mark.png")),
-      horizontal: fs.readFileSync(path.join(dir, "logo-horizontal.png")),
-    };
+    try {
+      logoCache = {
+        mark: fs.readFileSync(path.join(dir, "logo-mark.png")),
+        horizontal: fs.readFileSync(path.join(dir, "logo-horizontal.png")),
+      };
+    } catch (e) {
+      console.error(`[acta] no se pudieron leer los logos desde ${dir}:`, e);
+      logoCache = null;
+    }
   }
   return logoCache;
 }
@@ -86,6 +98,7 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   logo: { width: 132 },
+  logoFallback: { fontFamily: "Times-Bold", fontSize: 15, color: NAVY },
   headerMeta: { alignItems: "flex-end" },
   headerMetaLabel: { fontSize: 7, color: INK_MUTED, letterSpacing: 1 },
   headerMetaCode: {
@@ -338,10 +351,16 @@ export function AidRequestDocument({
       subject={`Expediente ${request.code}`}
     >
       <Page size="A4" style={styles.page}>
-        <Image fixed style={styles.watermark} src={{ data: logos.mark, format: "png" }} />
+        {logos && (
+          <Image fixed style={styles.watermark} src={{ data: logos.mark, format: "png" }} />
+        )}
 
         <View style={styles.header} fixed>
-          <Image style={styles.logo} src={{ data: logos.horizontal, format: "png" }} />
+          {logos ? (
+            <Image style={styles.logo} src={{ data: logos.horizontal, format: "png" }} />
+          ) : (
+            <Text style={styles.logoFallback}>{APP_NAME}</Text>
+          )}
           <View style={styles.headerMeta}>
             <Text style={styles.headerMetaLabel}>EXPEDIENTE</Text>
             <Text style={styles.headerMetaCode}>{request.code}</Text>
