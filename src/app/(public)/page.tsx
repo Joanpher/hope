@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Reveal } from "@/components/site/reveal";
 import { ProcessTimeline, type TimelineStep } from "@/components/site/process-timeline";
 import { MobileCtaBar } from "@/components/site/mobile-cta-bar";
+import { CountriesStrip } from "@/components/site/countries-strip";
 
 // ─── Contenido ────────────────────────────────────────────────────────────────
 
@@ -224,38 +225,41 @@ export default function LandingPage() {
 
       {/* ─── Quiénes somos ────────────────────────────────────────────────── */}
       <section id="nosotros" className="scroll-mt-20 bg-white py-16 sm:py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-          <Reveal kind="image" className="relative aspect-[3/2] overflow-hidden rounded-lg lg:order-2">
-            <Image
-              src="/images/foundation/comunidad-plaza.webp"
-              alt="Banderas ondean sobre una plaza llena de gente"
-              fill
-              quality={90}
-              sizes="(min-width: 1280px) 600px, (min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-            />
-          </Reveal>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <Reveal kind="image" className="relative aspect-[3/2] overflow-hidden rounded-lg lg:order-2">
+              <Image
+                src="/images/foundation/comunidad-plaza.webp"
+                alt="Banderas ondean sobre una plaza llena de gente"
+                fill
+                quality={90}
+                sizes="(min-width: 1280px) 600px, (min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
+            </Reveal>
 
-          <Reveal>
-            <h2 className="font-serif text-[32px] font-semibold leading-tight text-navy sm:text-4xl lg:text-[44px]">
-              Quiénes somos
-            </h2>
-            <p className="mt-4 text-[17px] leading-relaxed text-ink-muted sm:text-lg">
-              HopeRise Foundation acompaña a familias de Latinoamérica que
-              atraviesan una necesidad concreta: un medicamento que no
-              pueden pagar, un techo que se dañó con la lluvia, los útiles del
-              inicio de clases.
-            </p>
+            <Reveal>
+              <h2 className="font-serif text-[32px] font-semibold leading-tight text-navy sm:text-4xl lg:text-[44px]">
+                Quiénes somos
+              </h2>
+              <p className="mt-4 text-[17px] leading-relaxed text-ink-muted sm:text-lg">
+                HopeRise Foundation acompaña a familias de América que atraviesan
+                una necesidad concreta: un medicamento que no pueden pagar, un
+                techo que se dañó con la lluvia, los útiles del inicio de clases.
+              </p>
 
-            <dl className="mt-8 divide-y divide-line border-y border-line">
-              {commitments.map((c) => (
-                <div key={c.term} className="py-5 sm:grid sm:grid-cols-[13rem_1fr] sm:gap-6">
-                  <dt className="font-bold text-navy">{c.term}</dt>
-                  <dd className="mt-1 text-base leading-relaxed text-ink-muted sm:mt-0">{c.detail}</dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
+              <dl className="mt-8 divide-y divide-line border-y border-line">
+                {commitments.map((c) => (
+                  <div key={c.term} className="py-5 sm:grid sm:grid-cols-[13rem_1fr] sm:gap-6">
+                    <dt className="font-bold text-navy">{c.term}</dt>
+                    <dd className="mt-1 text-base leading-relaxed text-ink-muted sm:mt-0">{c.detail}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          </div>
+
+          <CountriesStrip />
         </div>
       </section>
 

@@ -8,10 +8,13 @@ import { updateProfile } from "@/server/actions/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { COUNTRIES } from "@/lib/countries";
+import { COUNTRIES, type CountryCode } from "@/lib/countries";
 
 interface ProfileFormProps {
-  initialData: UpdateProfileInput;
+  // `country` puede venir sin valor: una cuenta antigua pudo guardar un país
+  // que ya no está en la lista. En ese caso el selector arranca en el
+  // marcador de posición y Zod exige elegir uno antes de guardar.
+  initialData: Omit<UpdateProfileInput, "country"> & { country?: CountryCode };
 }
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
@@ -83,8 +86,14 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <select
           id="country"
           className="mt-1.5 flex h-10 w-full rounded-lg border border-line bg-white px-3.5 py-2 text-sm text-ink focus:outline-none focus:ring-2 focus:ring-leaf/20 focus:border-leaf transition-all duration-200"
+          defaultValue={initialData.country ?? ""}
           {...register("country")}
         >
+          {!initialData.country && (
+            <option value="" disabled>
+              Selecciona tu país
+            </option>
+          )}
           {COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>{c.name}</option>
           ))}

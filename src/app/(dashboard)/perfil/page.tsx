@@ -102,9 +102,13 @@ export default async function PerfilPage() {
               address: user.address ?? "",
               city: user.city ?? "",
               province: user.province ?? "",
+              // La lista se recortó a los nueve países donde opera la
+              // fundación. Si una cuenta guardó otro país, no se le asigna
+              // ninguno de los nuevos a sus espaldas: el selector queda sin
+              // elegir y la persona escoge el suyo al guardar.
               country: (COUNTRY_CODES as readonly string[]).includes(user.country)
                 ? (user.country as CountryCode)
-                : "OTHER",
+                : undefined,
             }}
           />
         </CardContent>
