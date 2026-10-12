@@ -53,27 +53,34 @@ export async function createAidRequest(
     observations,
   } = validated.data;
 
-  const sequence = await getNextRequestSequence();
-  const code = generateRequestCode(sequence);
+  const row = {
+    aidType,
+    description,
+    reason,
+    requestedAmount: requestedAmount ? parseFloat(requestedAmount) : null,
+    householdSize: householdSize ? parseInt(householdSize) : null,
+    employmentStatus: (employmentStatus as EmploymentStatus) || null,
+    monthlyIncome: monthlyIncome ? parseFloat(monthlyIncome) : null,
+    contactPhone: contactPhone || null,
+    contactAddress: contactAddress || null,
+    observations: observations || null,
+    userId: session.user.id,
+  };
 
-  const { data: request, error } = await supabase
-    .from("aid_requests")
-    .insert({
-      code,
-      aidType,
-      description,
-      reason,
-      requestedAmount: requestedAmount ? parseFloat(requestedAmount) : null,
-      householdSize: householdSize ? parseInt(householdSize) : null,
-      employmentStatus: (employmentStatus as EmploymentStatus) || null,
-      monthlyIncome: monthlyIncome ? parseFloat(monthlyIncome) : null,
-      contactPhone: contactPhone || null,
-      contactAddress: contactAddress || null,
-      observations: observations || null,
-      userId: session.user.id,
-    })
-    .select()
-    .single();
+  // Si dos solicitudes se envían a la vez pueden calcular el mismo código; la
+  // restricción única rechaza la segunda (23505) y se reintenta con el siguiente.
+  let code = "";
+  let request: unknown = null;
+  let error: { code?: string } | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    code = generateRequestCode(await getNextRequestSequence());
+    ({ data: request, error } = await supabase
+      .from("aid_requests")
+      .insert({ code, ...row })
+      .select()
+      .single());
+    if (error?.code !== "23505") break;
+  }
 
   if (error || !request) {
     console.error("Failed to create aid request:", error);

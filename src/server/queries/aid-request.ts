@@ -1,5 +1,6 @@
 import { supabase, sanitizeFilterValue } from "@/lib/supabase";
 import { toDate } from "@/lib/utils";
+import { REQUEST_CODE_PREFIX } from "@/lib/constants";
 import {
   AID_REQUEST_STATUSES,
   type AidRequestStatus,
@@ -234,11 +235,25 @@ export async function getStatusCounts(): Promise<
 /** Alias con el nombre que usaba la versión anterior. */
 export const getAidRequestStats = getStatusCounts;
 
+/**
+ * Siguiente número de secuencia para el código de solicitud del año en curso.
+ *
+ * Se parte del código más alto ya emitido, no del número de filas: si se borra
+ * una solicitud, contar filas devolvería un número ya usado y el `insert`
+ * chocaría con la restricción única de `code`. El orden por `code` es válido
+ * porque la secuencia va rellenada con ceros a ancho fijo.
+ */
 export async function getNextRequestSequence(): Promise<number> {
-  const { count, error } = await supabase
+  const prefix = `${REQUEST_CODE_PREFIX}-${new Date().getFullYear()}-`;
+  const { data, error } = await supabase
     .from("aid_requests")
-    .select("id", { count: "exact", head: true });
+    .select("code")
+    .like("code", `${prefix}%`)
+    .order("code", { ascending: false })
+    .limit(1);
 
   if (error) throw new Error(`Supabase: ${error.message}`);
-  return (count ?? 0) + 1;
+  const last = data?.[0]?.code as string | undefined;
+  const lastSeq = last ? parseInt(last.slice(prefix.length), 10) : 0;
+  return (Number.isFinite(lastSeq) ? lastSeq : 0) + 1;
 }
